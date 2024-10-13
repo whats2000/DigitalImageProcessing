@@ -8,22 +8,24 @@ Construct a simple image processing tool with a graphic user interface (GUI), pr
     (C) logarithmically (Y = ln(aX+b), b > 1).
 [x] Zoom in and shrink with respect to the images' original size by using bilinear interpolation.
 [x] Rotate images by user-defined degrees.
-[ ] Gray-level slicing: display images from a certain range of gray levels given by users.
+[x] Gray-level slicing: display images from a certain range of gray levels given by users.
     Requirements:
         (1) users can define the range of gray levels to be displayed;
         (2) users can choose either preserve the original values of unselected areas or display them as black color.
-[ ] Display the histogram of images. An “auto-level” function by using histogram equalization should be provided.
-[ ] Bit-Plane images: display the bit-plane images for the input image.
+[x] Display the histogram of images. An “auto-level” function by using histogram equalization should be provided.
+[x] Bit-Plane images: display the bit-plane images for the input image.
     Requirements: users should be able to select which bit-plane image to be displayed.
-[ ] Smoothing and sharpening: providing smoothing and sharpening options for the input images by using spatial filters.
+[x] Smoothing and sharpening: providing smoothing and sharpening options for the input images by using spatial filters.
     Requirements: the levels of smoothing and sharpening should be defined by users via GUI.
 """
 # First step is import the required libraries
 import math
-from typing import Union, Any
+from typing import Union, Any, List
 
 import tkinter as tk
 from tkinter import filedialog, messagebox
+
+import cv2
 import numpy as np
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
@@ -86,7 +88,6 @@ class ImageProcessorCore:
             Image.BILINEAR
         )
 
-
     @staticmethod
     def rotate_image(image: Image.Image, angle: float) -> Image.Image:
         """
@@ -99,6 +100,102 @@ class ImageProcessorCore:
         """
         return image.rotate(angle, resample=Image.BILINEAR)
 
+    @staticmethod
+    def gray_level_slicing(image: Image.Image, min_gray: int, max_gray: int, preserve_original: bool) -> Image.Image:
+        """
+        Perform gray level slicing on an image
+        Args:
+            image: The input image to apply gray level slicing
+            min_gray: The minimum gray level to preserve
+            max_gray: The maximum gray level to preserve
+            preserve_original: Whether to preserve the original values of unselected areas
+
+        Returns:
+            The sliced image
+        """
+        assert 0 <= min_gray <= 255, "Min gray level must be between 0 and 255"
+        image_array = np.array(image)
+
+        # Create a mask for the selected gray levels
+        mask = (image_array >= min_gray) & (image_array <= max_gray)
+
+        # Create a new image with the selected gray levels
+        new_image = np.zeros_like(image_array)
+
+        # Slice the image using the mask
+        new_image[mask] = image_array[mask]
+
+        # Preserve the original values of unselected areas
+        if preserve_original:
+            new_image[~mask] = image_array[~mask]
+
+        return Image.fromarray(new_image)
+
+    @staticmethod
+    def histogram_equalization(image: Image.Image) -> Image.Image:
+        """
+        Perform histogram equalization on a grayscale image
+        Args:
+            image: The input image to apply histogram equalization
+        Returns:
+            The equalized image
+        """
+        return Image.fromarray(cv2.equalizeHist(np.array(image)))
+
+    @staticmethod
+    def bit_plane_image(image: Image.Image, bit_plane: int) -> Image.Image:
+        """
+        Display the bit-plane images for the input image
+        Args:
+            image: The input image to apply bit-plane image
+            bit_plane: The bit-plane image to be displayed
+        Returns:
+            The bit-plane image
+        """
+        assert 0 <= bit_plane <= 7, "Bit-plane level must be between 0 and 7"
+
+        # Extract the specified bit-plane by bitwise shifting and masking
+        bit_plane_image = (np.array(image) >> bit_plane) & 1
+
+        # Scale the bit-plane image to the full 0-255 range for display purposes
+        bit_plane_image = bit_plane_image * 255
+
+        return Image.fromarray(bit_plane_image)
+
+    @staticmethod
+    def smooth_image(image: Image.Image, smoothing_level: int) -> Image.Image:
+        """
+        Smooth the image
+        Args:
+            image: The input image to apply smoothing
+            smoothing_level: The level of smoothing
+        Returns:
+            The smoothed image
+        """
+        assert smoothing_level > 0, "Smoothing level must be greater than 0"
+        assert smoothing_level % 2 == 1, "Smoothing level must be an odd number"
+        return Image.fromarray(cv2.GaussianBlur(np.array(image), (smoothing_level, smoothing_level), 0))
+
+    @staticmethod
+    def sharpen_image(image: Image.Image, sharpening_level: int) -> Image.Image:
+        """
+        Sharpen the image
+        Args:
+            image: The input image to apply sharpening
+            sharpening_level: The level of sharpening
+        Returns:
+            The sharpened image
+        """
+        image_array = np.array(image)
+
+        # Create a Laplacian filter
+        laplacian = cv2.Laplacian(image_array, cv2.CV_64F)
+        sharpened_image = image_array - sharpening_level * laplacian
+
+        # Clip the result
+        sharpened_image = np.clip(sharpened_image, 0, 255).astype(np.uint8)
+
+        return Image.fromarray(sharpened_image)
 
 class ImageProcessorApp:
     def __init__(self, root_window: tk.Tk):
@@ -112,6 +209,7 @@ class ImageProcessorApp:
 
         # Attributes for the image processing
         self.image: Union[Image.Image, None] = None
+        self.image_history: List[Image.Image] = []
         self.brightness_alpha = tk.DoubleVar()
         self.brightness_alpha.set(1.0)
         self.brightness_beta = tk.DoubleVar()
@@ -121,6 +219,18 @@ class ImageProcessorApp:
         self.resize_scale.set(1.0)
         self.rotate_angle = tk.DoubleVar()
         self.rotate_angle.set(0.0)
+        self.min_gray = tk.IntVar()
+        self.min_gray.set(0)
+        self.max_gray = tk.IntVar()
+        self.max_gray.set(255)
+        self.preserve_original = tk.BooleanVar()
+        self.preserve_original.set(True)
+        self.bit_plane_level = tk.IntVar()
+        self.bit_plane_level.set(0)
+        self.smoothing_level = tk.IntVar()
+        self.smoothing_level.set(1)
+        self.sharpening_level = tk.IntVar()
+        self.sharpening_level.set(1)
 
         # Set up the window
         self._setup_window()
@@ -136,6 +246,10 @@ class ImageProcessorApp:
         self._setup_upload_download_frame(right_operations_frame)
         self._setup_contrast_brightness_frame(right_operations_frame)
         self._setup_resize_rotate_frame(right_operations_frame)
+        self._setup_gray_level_slicing_frame(right_operations_frame)
+        self._setup_histogram_equalization_frame(right_operations_frame)
+        self._setup_bit_plane_frame(right_operations_frame)
+        self._setup_smoothing_sharpening_frame(right_operations_frame)
 
     def _setup_window(self):
         """
@@ -155,6 +269,10 @@ class ImageProcessorApp:
         """
         Set up the frame for displaying the image
         """
+        # Center the frame
+        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_rowconfigure(0, weight=1)
+
         # Create a frame to hold the image
         title = tk.Label(parent_frame, text="Image Display", bg=MAIN_THEME, fg=MAIN_FONT_COLOR)
         title.grid(row=0, column=0)
@@ -166,10 +284,6 @@ class ImageProcessorApp:
         title.grid(row=0, column=1)
         histogram_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
         histogram_frame.grid(row=1, column=1)
-
-        # Center the frame
-        self.root.grid_columnconfigure(0, weight=1)
-        self.root.grid_rowconfigure(0, weight=1)
 
         # Display the image using a label
         self.image_label = tk.Label(image_frame, bg=MAIN_THEME)
@@ -303,6 +417,166 @@ class ImageProcessorApp:
         self.resize_button.pack(side=tk.LEFT, padx=10)
         self.rotate_button.pack(side=tk.LEFT, padx=10)
 
+    def _setup_gray_level_slicing_frame(self, parent_frame: tk.Frame):
+        """
+        Set up the frame for gray level slicing
+        """
+        # Selection Text
+        selection_text = tk.Label(
+            parent_frame,
+            text="Gray Level Slicing",
+            bg=MAIN_THEME,
+            fg=MAIN_FONT_COLOR,
+        )
+        selection_text.grid(row=7, column=0)
+
+        # Preserve original values checkbox
+        preserve_original_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        preserve_original_frame.grid(row=8, column=0)
+        self.preserve_original_checkbox = tk.Checkbutton(
+            preserve_original_frame,
+            text="Preserve Original",
+            variable=self.preserve_original,
+            onvalue=True,
+            offvalue=False,
+        )
+        self.preserve_original_checkbox.pack(side=tk.LEFT, padx=10)
+
+        # Buttons for applying gray level slicing changes
+        self.slice_button = tk.Button(
+            preserve_original_frame,
+            text="Apply",
+            width=10,
+            command=self._apply_gray_level_slicing,
+        )
+        self.slice_button.pack(side=tk.LEFT, padx=10)
+
+        # Input boxes for min and max gray level
+        input_boxes_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        input_boxes_frame.grid(row=9, column=0)
+        self.min_gray_input = tk.Entry(
+            input_boxes_frame,
+            textvariable=self.min_gray,
+            width=10,
+        )
+        self.max_gray_input = tk.Entry(
+            input_boxes_frame,
+            textvariable=self.max_gray,
+            width=10,
+        )
+
+        self.min_gray_input.pack(side=tk.LEFT, padx=10)
+        self.max_gray_input.pack(side=tk.LEFT, padx=10)
+
+    def _setup_histogram_equalization_frame(self, parent_frame: tk.Frame):
+        """
+        Set up the frame for histogram equalization
+        """
+        # Selection Text
+        selection_text = tk.Label(
+            parent_frame,
+            text="Histogram Equalization",
+            bg=MAIN_THEME,
+            fg=MAIN_FONT_COLOR,
+        )
+        selection_text.grid(row=11, column=0)
+
+        # Button for histogram equalization
+        button_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        button_frame.grid(row=12, column=0)
+        self.equalize_button = tk.Button(
+            button_frame,
+            text="Equalize",
+            width=10,
+            command=self._equalize_histogram,
+        )
+
+        self.equalize_button.pack(side=tk.LEFT, padx=10)
+
+    def _setup_bit_plane_frame(self, parent_frame: tk.Frame):
+        """
+        Set up the frame for bit-plane images
+        """
+        # Selection Text
+        selection_text = tk.Label(
+            parent_frame,
+            text="Bit-Plane Images",
+            bg=MAIN_THEME,
+            fg=MAIN_FONT_COLOR,
+        )
+        selection_text.grid(row=13, column=0)
+
+        # Scale for selecting the bit-plane image
+        scale_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        scale_frame.grid(row=14, column=0)
+        self.bit_plane_scale = tk.Scale(
+            scale_frame,
+            from_=0,
+            to=7,
+            orient=tk.HORIZONTAL,
+            variable=self.bit_plane_level,
+        )
+        self.bit_plane_scale.pack(side=tk.LEFT, padx=10)
+
+        # Button for displaying the bit-plane image
+        self.bit_plane_button = tk.Button(
+            scale_frame,
+            text="Apply",
+            width=10,
+            command=self._display_bit_plane_image,
+        )
+        self.bit_plane_button.pack(side=tk.LEFT, padx=10)
+
+    def _setup_smoothing_sharpening_frame(self, parent_frame: tk.Frame):
+        """
+        Set up the frame for smoothing and sharpening
+        """
+        # Selection Text
+        selection_text = tk.Label(
+            parent_frame,
+            text="Smoothing and Sharpening",
+            bg=MAIN_THEME,
+            fg=MAIN_FONT_COLOR,
+        )
+        selection_text.grid(row=15, column=0)
+
+        # Input boxes for smoothing and sharpening
+        input_boxes_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        input_boxes_frame.grid(row=16, column=0)
+        self.smoothing_input = tk.Entry(
+            input_boxes_frame,
+            textvariable=self.smoothing_level,
+            width=10,
+        )
+        self.sharpening_input = tk.Entry(
+            input_boxes_frame,
+            textvariable=self.sharpening_level,
+            width=10,
+        )
+
+        self.smoothing_input.pack(side=tk.LEFT, padx=10)
+        self.sharpening_input.pack(side=tk.LEFT, padx=10)
+
+        # Buttons for smoothing and sharpening
+        button_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        button_frame.grid(row=17, column=0)
+
+        self.smoothing_button = tk.Button(
+            button_frame,
+            text="Smooth",
+            width=10,
+            command=self._smooth_image,
+        )
+        self.sharpening_button = tk.Button(
+            button_frame,
+            text="Sharpen",
+            width=10,
+            command=self._sharpen_image,
+        )
+
+        self.smoothing_button.pack(side=tk.LEFT, padx=10)
+        self.sharpening_button.pack(side=tk.LEFT, padx=10)
+
     def _open_image(self):
         """
         Open an image from the file dialog
@@ -343,6 +617,10 @@ class ImageProcessorApp:
             new_image: The new image to display
         """
         # Update the image attribute
+        self.image_history.append(self.image)
+        if len(self.image_history) > 10:
+            self.image_history.pop(0)
+
         self.image = new_image
         photo_image: Any = ImageTk.PhotoImage(new_image)
         self.image_label.config(image=photo_image)
@@ -416,6 +694,90 @@ class ImageProcessorApp:
 
         # Rotate the image
         new_image = ImageProcessorCore.rotate_image(self.image, angle)
+
+        # Update the image
+        self._update_image(new_image)
+
+    def _apply_gray_level_slicing(self):
+        """
+        Apply gray level slicing to the image
+        """
+        if not self.image:
+            messagebox.showinfo("Info", "Please open an image first")
+            return
+
+        min_gray = self.min_gray.get()
+        max_gray = self.max_gray.get()
+        preserve_original = self.preserve_original.get()
+
+        if min_gray > max_gray:
+            messagebox.showinfo("Info", "Min gray level must be less than max gray level")
+            return
+
+        # Apply gray-level slicing
+        sliced_image = ImageProcessorCore.gray_level_slicing(self.image, min_gray, max_gray, preserve_original)
+
+        self._update_image(sliced_image)
+
+    def _equalize_histogram(self):
+        """
+        Equalize the histogram of the image
+        """
+        if not self.image:
+            messagebox.showinfo("Info", "Please open an image first")
+            return
+
+        # Equalize the histogram
+        new_image = ImageProcessorCore.histogram_equalization(self.image)
+
+        # Update the image
+        self._update_image(new_image)
+
+    def _display_bit_plane_image(self):
+        """
+        Display the bit-plane image
+        """
+        if not self.image:
+            messagebox.showinfo("Info", "Please open an image first")
+            return
+
+        bit_plane = self.bit_plane_level.get()
+
+        if bit_plane < 0 or bit_plane > 7:
+            messagebox.showinfo("Info", "Bit-plane level must be between 0 and 7")
+            return
+
+        new_image = ImageProcessorCore.bit_plane_image(self.image, bit_plane)
+        self._update_image(new_image)
+
+    def _smooth_image(self):
+        """
+        Smooth the image
+        """
+        if not self.image:
+            messagebox.showinfo("Info", "Please open an image first")
+            return
+
+        smoothing_level = self.smoothing_level.get()
+
+        # Smooth the image
+        new_image = ImageProcessorCore.smooth_image(self.image, smoothing_level)
+
+        # Update the image
+        self._update_image(new_image)
+
+    def _sharpen_image(self):
+        """
+        Sharpen the image
+        """
+        if not self.image:
+            messagebox.showinfo("Info", "Please open an image first")
+            return
+
+        sharpening_level = self.sharpening_level.get()
+
+        # Sharpen the image
+        new_image = ImageProcessorCore.sharpen_image(self.image, sharpening_level)
 
         # Update the image
         self._update_image(new_image)
