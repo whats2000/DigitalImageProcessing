@@ -13,15 +13,12 @@ bilinear interpolation.
 5. Gray-level slicing: display images from a certain range of gray levels given
 by users. 
 Requirements: 
-(1) users can define the range of gray levels to
-be displayed; 
-(2) users can choose either preserve the original values of unselected areas or 
-display them as black color.
+(1) users can define the range of gray levels to be displayed;
+(2) users can choose either preserve the original values of unselected areas or display them as black color.
 6. Display the histogram of images. An “auto-level” function by using histogram 
 equalization should be provided.
 7. Bit-Plane images: display the bit-plane images for the input image.
-Requirements: users should be able to select which bit-plane image to be
-displayed.
+Requirements: users should be able to select which bit-plane image to be displayed.
 8. Smoothing and sharpening: providing smoothing and sharpening options
 for the input images by using spatial filters. Requirements: the levels of
 smoothing and sharpening should be defined by users via GUI.
@@ -31,9 +28,10 @@ import math
 from typing import Union, Any
 
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import numpy as np
 from PIL import Image, ImageTk
+import matplotlib.pyplot as plt
 
 # Define the style for the application
 MAIN_THEME = "#282c34"
@@ -57,6 +55,7 @@ class ImageProcessorCore:
         image_array = np.array(image)
 
         if beta <= 1 and algorithm == "Logarithmic":
+            messagebox.showerror("Error", "Beta value must be greater than 1 for logarithmic algorithm")
             raise ValueError("Beta value must be greater than 1 for logarithmic algorithm")
 
         if algorithm == "Linear":
@@ -66,6 +65,7 @@ class ImageProcessorCore:
         elif algorithm == "Logarithmic":
             new_image = np.log(alpha * image_array + beta)
         else:
+            messagebox.showerror("Error", "Invalid brightness algorithm")
             raise ValueError("Invalid brightness algorithm")
 
         # Clip the values to 0-255
@@ -124,7 +124,9 @@ class ImageProcessorApp:
         # Set up the window
         self._setup_window()
         # Set up the main image display frame
-        self._setup_image_display_frame()
+        left_display_frame = tk.Frame(self.root, bg=MAIN_THEME)
+        left_display_frame.grid(row=0, column=0)
+        self._setup_image_display_frame(left_display_frame)
         # Set up the right operations frame
         right_operations_frame = tk.Frame(self.root, bg=MAIN_THEME)
         right_operations_frame.grid(row=0, column=1)
@@ -148,20 +150,33 @@ class ImageProcessorApp:
         # Make screen resizable
         self.root.resizable(True, True)
 
-    def _setup_image_display_frame(self):
+    def _setup_image_display_frame(self, parent_frame: tk.Frame):
         """
         Set up the frame for displaying the image
         """
         # Create a frame to hold the image
-        image_frame = tk.Frame(self.root, bg=MAIN_THEME, pady=10)
-        image_frame.grid(row=0, column=0)
+        title = tk.Label(parent_frame, text="Image Display", bg=MAIN_THEME, fg=MAIN_FONT_COLOR)
+        title.grid(row=0, column=0)
+        image_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        image_frame.grid(row=1, column=0)
 
-        # Center the frame horizontally (X-axis) using column configuration
+        # Create a frame for histogram
+        title = tk.Label(parent_frame, text="Histogram", bg=MAIN_THEME, fg=MAIN_FONT_COLOR)
+        title.grid(row=0, column=1)
+        histogram_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        histogram_frame.grid(row=1, column=1)
+
+        # Center the frame
         self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_rowconfigure(0, weight=1)
 
         # Display the image using a label
         self.image_label = tk.Label(image_frame, bg=MAIN_THEME)
         self.image_label.pack()
+
+        # Display the histogram using a label
+        self.histogram_label = tk.Label(histogram_frame, bg=MAIN_THEME)
+        self.histogram_label.pack()
 
     def _setup_upload_download_frame(self, parent_frame: tk.Frame):
         """
@@ -295,6 +310,7 @@ class ImageProcessorApp:
 
         # Prevent illegal file path
         if not file_path:
+            messagebox.showerror("Error", "Invalid file path")
             return
 
         # Update the image label with the new image
@@ -304,14 +320,18 @@ class ImageProcessorApp:
         """
         Save the image to a file
         """
+        if not self.image:
+            messagebox.showinfo("Info", "Please open an image first")
+            return
+
         file_name = filedialog.asksaveasfilename(
             defaultextension=".jpg",
             filetypes=[("JPEG files", "*.jpg"), ("All files", "*.*")]
         )
 
-        # Only save the image if the file name is not empty and the image is exist
-        if not file_name or not self.image:
+        if not file_name:
             return
+
         image_to_save = self.image.convert("RGB")
         image_to_save.save(file_name)
 
@@ -321,15 +341,42 @@ class ImageProcessorApp:
         Args:
             new_image: The new image to display
         """
+        # Update the image attribute
         self.image = new_image
         photo_image: Any = ImageTk.PhotoImage(new_image)
         self.image_label.config(image=photo_image)
         self.image_label.image = photo_image
+        self._update_histogram()
+
+    def _update_histogram(self):
+        """
+        Update the histogram of the image
+        """
+        # Update the histogram
+        image_array = np.array(self.image)
+        plt.figure("Histogram")
+        plt.clf()
+        plt.hist(image_array.flatten(), bins=256, range=(0, 255), color='gray', alpha=0.7)
+        plt.title("Image Histogram")
+        plt.xlabel("Pixel Value")
+        plt.ylabel("Frequency")
+        plt.grid()
+        plt.savefig("histogram.png", dpi=100)
+        histogram_image = Image.open("histogram.png").resize(
+            (min(400, self.image.width), min(400, self.image.height))
+        )
+        histogram_photo_image: Any = ImageTk.PhotoImage(histogram_image)
+        self.histogram_label.config(image=histogram_photo_image)
+        self.histogram_label.image = histogram_photo_image
 
     def _apply_brightness_algorithm(self):
         """
         Apply the brightness algorithm to a pixel value
         """
+        if not self.image:
+            messagebox.showinfo("Info", "Please open an image first")
+            return
+
         algorithm = self.brightness_algorithm.get()
         alpha = self.brightness_alpha.get()
         beta = self.brightness_beta.get()
@@ -344,6 +391,10 @@ class ImageProcessorApp:
         """
         Resize the image using the scale factor
         """
+        if not self.image:
+            messagebox.showinfo("Info", "Please open an image first")
+            return
+
         scale_factor = self.resize_scale.get()
 
         # Resize the image
@@ -356,6 +407,10 @@ class ImageProcessorApp:
         """
         Rotate the image using the angle
         """
+        if not self.image:
+            messagebox.showinfo("Info", "Please open an image first")
+            return
+
         angle = self.rotate_angle.get()
 
         # Rotate the image
