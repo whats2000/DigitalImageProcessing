@@ -210,6 +210,7 @@ class ImageProcessorApp:
         # Attributes for the image processing
         self.image: Union[Image.Image, None] = None
         self.image_history: List[Image.Image] = []
+        self.redo_stack: List[Image.Image] = []
         self.brightness_alpha = tk.DoubleVar()
         self.brightness_alpha.set(1.0)
         self.brightness_beta = tk.DoubleVar()
@@ -292,6 +293,12 @@ class ImageProcessorApp:
         # Display the histogram using a label
         self.histogram_label = tk.Label(histogram_frame, bg=MAIN_THEME)
         self.histogram_label.pack()
+
+        # Undo and redo buttons
+        undo_button = tk.Button(parent_frame, text="Undo", command=self._undo_image)
+        redo_button = tk.Button(parent_frame, text="Redo", command=self._redo_image)
+        undo_button.grid(row=2, column=0)
+        redo_button.grid(row=2, column=1)
 
     def _setup_upload_download_frame(self, parent_frame: tk.Frame):
         """
@@ -577,6 +584,36 @@ class ImageProcessorApp:
         self.smoothing_button.pack(side=tk.LEFT, padx=10)
         self.sharpening_button.pack(side=tk.LEFT, padx=10)
 
+    def _undo_image(self):
+        """
+        Undo the last image change
+        """
+        if not self.image_history:
+            messagebox.showinfo("Info", "No more actions to undo")
+            return
+
+            # Push the current image to the redo stack
+        self.redo_stack.append(self.image)
+
+        # Pop the last image from history and update
+        previous_image = self.image_history.pop()
+        self._update_image(previous_image, append_history=False)
+
+    def _redo_image(self):
+        """
+        Redo the last image change
+        """
+        if not self.redo_stack:
+            messagebox.showinfo("Info", "No more actions to redo")
+            return
+
+            # Push the current image back to the history stack
+        self.image_history.append(self.image)
+
+        # Pop the last image from the redo stack and update
+        next_image = self.redo_stack.pop()
+        self._update_image(next_image, append_history=False)
+
     def _open_image(self):
         """
         Open an image from the file dialog
@@ -610,16 +647,23 @@ class ImageProcessorApp:
         image_to_save = self.image.convert("RGB")
         image_to_save.save(file_name)
 
-    def _update_image(self, new_image: Image.Image):
+    def _update_image(self, new_image: Image.Image, append_history: bool = True):
         """
         Update the image label with a new image
         Args:
             new_image: The new image to display
         """
-        # Update the image attribute
-        self.image_history.append(self.image)
-        if len(self.image_history) > 10:
-            self.image_history.pop(0)
+        if append_history:
+            # Append current image to history before updating
+            if self.image is not None:
+                self.image_history.append(self.image)
+
+            # Clear the redo stack when a new image operation is performed
+            self.redo_stack.clear()
+
+            # Keep history size reasonable
+            if len(self.image_history) > 10:
+                self.image_history.pop(0)
 
         self.image = new_image
         photo_image: Any = ImageTk.PhotoImage(new_image)
