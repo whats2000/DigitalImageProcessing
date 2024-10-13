@@ -42,6 +42,39 @@ MAIN_FONT_COLOR = "#ffffff"
 MAIN_ACTIVE_COLOR = "#528bff"
 
 
+class ImageProcessorCore:
+    @staticmethod
+    def adjust_brightness(image: Image.Image, alpha: float, beta: float, algorithm: str) -> Image.Image:
+        """
+        Adjust the brightness of an image using a linear, exponential, or logarithmic algorithm
+        Args:
+            image: The image to adjust
+            alpha: The alpha value for the algorithm
+            beta: The beta value for the algorithm
+            algorithm: The algorithm to use for adjusting the brightness
+        Returns:
+            The adjusted image
+        """
+        image_array = np.array(image)
+
+        if beta <= 1 and algorithm == "Logarithmic":
+            raise ValueError("Beta value must be greater than 1 for logarithmic algorithm")
+
+        if algorithm == "Linear":
+            new_image = alpha * image_array + beta
+        elif algorithm == "Exponential":
+            new_image = np.exp(alpha * image_array + beta)
+        elif algorithm == "Logarithmic":
+            new_image = np.log(alpha * image_array + beta)
+        else:
+            raise ValueError("Invalid brightness algorithm")
+
+        # Clip the values to 0-255
+        new_image = np.clip(new_image, 0, 255)
+
+        return Image.fromarray(new_image)
+
+
 class ImageProcessorApp:
     def __init__(self, root_window: tk.Tk):
         """
@@ -55,6 +88,7 @@ class ImageProcessorApp:
         # Attributes for the image processing
         self.image: Union[Image.Image, None] = None
         self.brightness_alpha = tk.DoubleVar()
+        self.brightness_alpha.set(1.0)
         self.brightness_beta = tk.DoubleVar()
         self.brightness_algorithm = tk.StringVar()
         self.brightness_algorithm.set("Linear")
@@ -133,7 +167,7 @@ class ImageProcessorApp:
         # Selection Text
         selection_text = tk.Label(
             parent_frame,
-            text="Select the brightness algorithm",
+            text="Adjust brightness and contrast",
             bg=MAIN_THEME,
             fg=MAIN_FONT_COLOR,
         )
@@ -191,14 +225,16 @@ class ImageProcessorApp:
         """
         Save the image to a file
         """
-        file_name = filedialog.asksaveasfilename(defaultextension=".jpg")
+        file_name = filedialog.asksaveasfilename(
+            defaultextension=".jpg",
+            filetypes=[("JPEG files", "*.jpg"), ("All files", "*.*")]
+        )
 
         # Only save the image if the file name is not empty and the image is exist
         if not file_name or not self.image:
             return
-
-        self.image.save(file_name)
-
+        image_to_save = self.image.convert("RGB")
+        image_to_save.save(file_name)
 
     def _update_image(self, new_image: Image.Image):
         """
@@ -211,30 +247,19 @@ class ImageProcessorApp:
         self.image_label.config(image=photo_image)
         self.image_label.image = photo_image
 
-
     def _apply_brightness_algorithm(self):
         """
         Apply the brightness algorithm to a pixel value
         """
-        image_array = np.array(self.image)
         algorithm = self.brightness_algorithm.get()
         alpha = self.brightness_alpha.get()
         beta = self.brightness_beta.get()
 
-        if algorithm == "Linear":
-            new_image = alpha * image_array + beta
-        elif algorithm == "Exponential":
-            new_image = np.exp(alpha * image_array + beta)
-        elif algorithm == "Logarithmic":
-            new_image = np.log(alpha * image_array + beta)
-        else:
-            raise ValueError("Invalid brightness algorithm")
-
-        # Clip the values to 0-255
-        new_image = np.clip(new_image, 0, 255)
+        # Apply the brightness algorithm to the image
+        new_image = ImageProcessorCore.adjust_brightness(self.image, alpha, beta, algorithm)
 
         # Update the image
-        self._update_image(Image.fromarray(new_image))
+        self._update_image(new_image)
 
 
 if __name__ == '__main__':
