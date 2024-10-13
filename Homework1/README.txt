@@ -2,12 +2,10 @@
 
 ## Environment
 - OS: Ubuntu 24.04
-- Python: 3.11 (Anaconda)
+- Python: 3.10
 
-Create a new conda environment and install the required packages by running the following commands:
+Install the required packages by running the following commands:
 ```bash
-conda create -n digital_image_processing -y python=3.11
-conda activate digital_image_processing
 pip install pillow numpy matplotlib opencv-python
 sudo apt install python3-tk
 ```

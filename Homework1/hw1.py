@@ -27,6 +27,8 @@ for the input images by using spatial filters. Requirements: the levels of
 smoothing and sharpening should be defined by users via GUI.
 """
 # First step is import the required libraries
+import math
+
 import tkinter as tk
 
 
@@ -39,10 +41,20 @@ class ImageProcessorApp:
         """
         self.root = root_window
         self.root.title('Image Processor Tool')
-        self.root.geometry('500x500')
+
+        # Get the screen width and height multiplied by 0.5 as the default window size
+        window_width = math.floor(root.winfo_screenwidth() * 0.5)
+        window_height = math.floor(root.winfo_screenheight() * 0.5)
+
+        # Set the window size
+        self.root.geometry(f"{window_width}x{window_height}")
+
+        # Make screen resizable
+        self.root.resizable(True, True)
 
 
 if __name__ == '__main__':
     root = tk.Tk()
     app = ImageProcessorApp(root)
+    root.configure(background='#282c34')
     root.mainloop()
