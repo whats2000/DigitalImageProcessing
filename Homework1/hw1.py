@@ -32,18 +32,14 @@ from typing import Union
 
 import tkinter as tk
 from tkinter import filedialog
+
+import numpy as np
 from PIL import Image, ImageTk
 
 # Define the style for the application
 MAIN_THEME = "#282c34"
 MAIN_FONT_COLOR = "#ffffff"
 MAIN_ACTIVE_COLOR = "#528bff"
-BUTTON_STYLE = {
-    "bg": MAIN_THEME,
-    "fg": MAIN_FONT_COLOR,
-    "activebackground": MAIN_ACTIVE_COLOR,
-    "activeforeground": MAIN_FONT_COLOR,
-}
 
 
 class ImageProcessorApp:
@@ -56,13 +52,24 @@ class ImageProcessorApp:
         self.root = root_window
         self.root.title('Image Processor Tool')
 
-        # Attributes for the image
+        # Attributes for the image processing
         self.image: Union[Image.Image, None] = None
+        self.brightness_alpha = tk.DoubleVar()
+        self.brightness_beta = tk.DoubleVar()
+        self.brightness_algorithm = tk.StringVar()
+        self.brightness_algorithm.set("Linear")
 
-        # Set up the app
+        # Set up the window
         self._setup_window()
+        # Set up the main image display frame
         self._setup_image_display_frame()
-        self._setup_upload_download_frame()
+        # Set up the right operations frame
+        right_operations_frame = tk.Frame(self.root, bg=MAIN_THEME)
+        right_operations_frame.grid(row=0, column=1)
+        self.root.grid_columnconfigure(1, weight=1)
+        self.root.grid_rowconfigure(0, weight=1)
+        self._setup_upload_download_frame(right_operations_frame)
+        self._setup_contrast_brightness_frame(right_operations_frame)
 
     def _setup_window(self):
         """
@@ -93,13 +100,13 @@ class ImageProcessorApp:
         self.image_label = tk.Label(image_frame, bg=MAIN_THEME)
         self.image_label.pack()
 
-    def _setup_upload_download_frame(self):
+    def _setup_upload_download_frame(self, parent_frame: tk.Frame):
         """
         Set up the frame for uploading and downloading images
         """
         # Create a frame to hold the buttons
-        button_frame = tk.Frame(self.root, bg=MAIN_THEME, pady=10)
-        button_frame.grid(row=1, column=0)
+        button_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        button_frame.grid(row=0, column=0)
 
         # Center the frame horizontally (X-axis) using column configuration
         self.root.grid_columnconfigure(0, weight=1)
@@ -108,21 +115,66 @@ class ImageProcessorApp:
         self.open_button = tk.Button(
             button_frame,
             text="Open Image",
-            command=self.open_image,
-            **BUTTON_STYLE
+            command=self._open_image,
         )
         self.save_button = tk.Button(
             button_frame,
             text="Save Image",
-            command=self.save_image,
-            **BUTTON_STYLE
+            command=self._save_image,
         )
 
-        # Pack the buttons side by side within the frame (with some padding)
         self.open_button.pack(side=tk.LEFT, padx=10)
         self.save_button.pack(side=tk.LEFT, padx=10)
 
-    def open_image(self):
+    def _setup_contrast_brightness_frame(self, parent_frame: tk.Frame):
+        """
+        Set up the frame for adjusting alpha and beta values for brightness/contrast
+        """
+        # Selection Text
+        selection_text = tk.Label(
+            parent_frame,
+            text="Select the brightness algorithm",
+            bg=MAIN_THEME,
+            fg=MAIN_FONT_COLOR,
+        )
+        selection_text.grid(row=1, column=0)
+
+        # Menu for selecting the brightness algorithm
+        menu_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        menu_frame.grid(row=2, column=0)
+        self.brightness_menu = tk.OptionMenu(
+            menu_frame,
+            self.brightness_algorithm,
+            "Linear",
+            "Exponential",
+            "Logarithmic",
+        )
+        self.brightness_apply_button = tk.Button(
+            menu_frame,
+            text="Apply",
+            command=self._apply_brightness_algorithm,
+        )
+        self.brightness_menu.pack(side=tk.LEFT, padx=10)
+        self.brightness_apply_button.pack(side=tk.LEFT, padx=10)
+
+        # Input boxes for adjusting alpha and beta values
+        input_boxes_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        input_boxes_frame.grid(row=3, column=0)
+        self.alpha_input = tk.Entry(
+            input_boxes_frame,
+            textvariable=self.brightness_alpha,
+            width=10,
+        )
+        self.beta_input = tk.Entry(
+            input_boxes_frame,
+            textvariable=self.brightness_beta,
+            width=10,
+        )
+
+        self.alpha_input.pack(side=tk.LEFT, padx=10)
+        self.beta_input.pack(side=tk.LEFT, padx=10)
+
+    def _open_image(self):
         """
         Open an image from the file dialog
         """
@@ -132,17 +184,10 @@ class ImageProcessorApp:
         if not file_path:
             return
 
-        # Read the image using PIL
-        self.image = Image.open(file_path)
+        # Update the image label with the new image
+        self._update_image(Image.open(file_path))
 
-        # Convert the image to ImageTk.PhotoImage
-        photo_image = ImageTk.PhotoImage(self.image)
-
-        # Update the image label
-        self.image_label.config(image=photo_image)
-        self.image_label.image = photo_image
-
-    def save_image(self):
+    def _save_image(self):
         """
         Save the image to a file
         """
@@ -153,6 +198,43 @@ class ImageProcessorApp:
             return
 
         self.image.save(file_name)
+
+
+    def _update_image(self, new_image: Image.Image):
+        """
+        Update the image label with a new image
+        Args:
+            new_image: The new image to display
+        """
+        self.image = new_image
+        photo_image = ImageTk.PhotoImage(new_image)
+        self.image_label.config(image=photo_image)
+        self.image_label.image = photo_image
+
+
+    def _apply_brightness_algorithm(self):
+        """
+        Apply the brightness algorithm to a pixel value
+        """
+        image_array = np.array(self.image)
+        algorithm = self.brightness_algorithm.get()
+        alpha = self.brightness_alpha.get()
+        beta = self.brightness_beta.get()
+
+        if algorithm == "Linear":
+            new_image = alpha * image_array + beta
+        elif algorithm == "Exponential":
+            new_image = np.exp(alpha * image_array + beta)
+        elif algorithm == "Logarithmic":
+            new_image = np.log(alpha * image_array + beta)
+        else:
+            raise ValueError("Invalid brightness algorithm")
+
+        # Clip the values to 0-255
+        new_image = np.clip(new_image, 0, 255)
+
+        # Update the image
+        self._update_image(Image.fromarray(new_image))
 
 
 if __name__ == '__main__':
