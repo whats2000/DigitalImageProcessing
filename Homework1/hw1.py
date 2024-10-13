@@ -28,11 +28,10 @@ smoothing and sharpening should be defined by users via GUI.
 """
 # First step is import the required libraries
 import math
-from typing import Union
+from typing import Union, Any
 
 import tkinter as tk
 from tkinter import filedialog
-
 import numpy as np
 from PIL import Image, ImageTk
 
@@ -74,6 +73,31 @@ class ImageProcessorCore:
 
         return Image.fromarray(new_image)
 
+    @staticmethod
+    def resize_image(image: Image.Image, scale_factor: float) -> Image.Image:
+        """
+        Resize an image using bilinear interpolation (Optimized with NumPy)
+        Args:
+            image: The image to resize
+            scale_factor: The scale factor for resizing
+        Returns:
+            The resized image
+        """
+        raise NotImplementedError("Resize image function is not implemented yet")
+
+
+    @staticmethod
+    def rotate_image(image: Image.Image, angle: float) -> Image.Image:
+        """
+        Rotate an image by a given angle
+        Args:
+            image: The image to rotate
+            angle: The angle to rotate the image by
+        Returns:
+            The rotated image
+        """
+        raise NotImplementedError("Rotate image function is not implemented yet")
+
 
 class ImageProcessorApp:
     def __init__(self, root_window: tk.Tk):
@@ -92,6 +116,10 @@ class ImageProcessorApp:
         self.brightness_beta = tk.DoubleVar()
         self.brightness_algorithm = tk.StringVar()
         self.brightness_algorithm.set("Linear")
+        self.resize_scale = tk.DoubleVar()
+        self.resize_scale.set(1.0)
+        self.rotate_angle = tk.DoubleVar()
+        self.rotate_angle.set(0.0)
 
         # Set up the window
         self._setup_window()
@@ -104,6 +132,7 @@ class ImageProcessorApp:
         self.root.grid_rowconfigure(0, weight=1)
         self._setup_upload_download_frame(right_operations_frame)
         self._setup_contrast_brightness_frame(right_operations_frame)
+        self._setup_resize_rotate_frame(right_operations_frame)
 
     def _setup_window(self):
         """
@@ -186,6 +215,7 @@ class ImageProcessorApp:
         self.brightness_apply_button = tk.Button(
             menu_frame,
             text="Apply",
+            width=10,
             command=self._apply_brightness_algorithm,
         )
         self.brightness_menu.pack(side=tk.LEFT, padx=10)
@@ -207,6 +237,55 @@ class ImageProcessorApp:
 
         self.alpha_input.pack(side=tk.LEFT, padx=10)
         self.beta_input.pack(side=tk.LEFT, padx=10)
+
+    def _setup_resize_rotate_frame(self, parent_frame: tk.Frame):
+        """
+        Set up the frame for resizing and rotating images
+        """
+        # Selection Text
+        selection_text = tk.Label(
+            parent_frame,
+            text="Resize and Rotate",
+            bg=MAIN_THEME,
+            fg=MAIN_FONT_COLOR,
+        )
+        selection_text.grid(row=4, column=0)
+
+        # Input boxes for resizing and rotating
+        input_boxes_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        input_boxes_frame.grid(row=5, column=0)
+        self.resize_input = tk.Entry(
+            input_boxes_frame,
+            textvariable=self.resize_scale,
+            width=10,
+        )
+        self.rotate_input = tk.Entry(
+            input_boxes_frame,
+            textvariable=self.rotate_angle,
+            width=10,
+        )
+
+        self.resize_input.pack(side=tk.LEFT, padx=10)
+        self.rotate_input.pack(side=tk.LEFT, padx=10)
+
+        # Buttons for resizing and rotating
+        button_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        button_frame.grid(row=6, column=0)
+        self.resize_button = tk.Button(
+            button_frame,
+            text="Resize",
+            width=10,
+            command=self._resize_image,
+        )
+        self.rotate_button = tk.Button(
+            button_frame,
+            text="Rotate",
+            width=10,
+            command=self._rotate_image,
+        )
+
+        self.resize_button.pack(side=tk.LEFT, padx=10)
+        self.rotate_button.pack(side=tk.LEFT, padx=10)
 
     def _open_image(self):
         """
@@ -243,7 +322,7 @@ class ImageProcessorApp:
             new_image: The new image to display
         """
         self.image = new_image
-        photo_image = ImageTk.PhotoImage(new_image)
+        photo_image: Any = ImageTk.PhotoImage(new_image)
         self.image_label.config(image=photo_image)
         self.image_label.image = photo_image
 
@@ -257,6 +336,30 @@ class ImageProcessorApp:
 
         # Apply the brightness algorithm to the image
         new_image = ImageProcessorCore.adjust_brightness(self.image, alpha, beta, algorithm)
+
+        # Update the image
+        self._update_image(new_image)
+
+    def _resize_image(self):
+        """
+        Resize the image using the scale factor
+        """
+        scale_factor = self.resize_scale.get()
+
+        # Resize the image
+        new_image = ImageProcessorCore.resize_image(self.image, scale_factor)
+
+        # Update the image
+        self._update_image(new_image)
+
+    def _rotate_image(self):
+        """
+        Rotate the image using the angle
+        """
+        angle = self.rotate_angle.get()
+
+        # Rotate the image
+        new_image = ImageProcessorCore.rotate_image(self.image, angle)
 
         # Update the image
         self._update_image(new_image)
