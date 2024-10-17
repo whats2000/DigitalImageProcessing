@@ -236,7 +236,7 @@ class ImageProcessorApp:
         self.bit_plane_level = tk.IntVar()
         self.bit_plane_level.set(0)
         self.smoothing_level = tk.IntVar()
-        self.smoothing_level.set(1)
+        self.smoothing_level.set(3)
         self.sharpening_level = tk.IntVar()
         self.sharpening_level.set(1)
 
