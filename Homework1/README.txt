@@ -3,6 +3,7 @@
 ## Environment
 - OS: Ubuntu 24.04
 - Python: 3.10
+- Packages: See the requirements.txt
 
 Install the required packages by running the following commands:
 ```bash

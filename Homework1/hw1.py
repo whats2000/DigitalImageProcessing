@@ -85,7 +85,7 @@ class ImageProcessorCore:
                 math.floor(image.width * scale_factor),
                 math.floor(image.height * scale_factor)
             ),
-            Image.BILINEAR
+            Image.Resampling.BILINEAR
         )
 
     @staticmethod
@@ -98,7 +98,7 @@ class ImageProcessorCore:
         Returns:
             The rotated image
         """
-        return image.rotate(angle, resample=Image.BILINEAR)
+        return image.rotate(angle, resample=Image.Resampling.BILINEAR)
 
     @staticmethod
     def gray_level_slicing(image: Image.Image, min_gray: int, max_gray: int, preserve_original: bool) -> Image.Image:
@@ -123,7 +123,7 @@ class ImageProcessorCore:
         new_image = np.zeros_like(image_array)
 
         # Slice the image using the mask
-        new_image[mask] = image_array[mask]
+        new_image[mask] = 255
 
         # Preserve the original values of unselected areas
         if preserve_original:
@@ -173,7 +173,8 @@ class ImageProcessorCore:
             The smoothed image
         """
         assert smoothing_level > 0, "Smoothing level must be greater than 0"
-        assert smoothing_level % 2 == 1, "Smoothing level must be an odd number"
+        if smoothing_level % 2 == 0:
+            smoothing_level += 1
         return Image.fromarray(cv2.GaussianBlur(np.array(image), (smoothing_level, smoothing_level), 0))
 
     @staticmethod
