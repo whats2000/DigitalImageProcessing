@@ -53,7 +53,7 @@ class ImageProcessorCore:
         Returns:
             The adjusted image
         """
-        image_array = np.array(image)
+        image_array = np.array(image, dtype=np.float32)
 
         if beta <= 1 and algorithm == "Logarithmic":
             messagebox.showerror("Error", "Beta value must be greater than 1 for logarithmic algorithm")
@@ -62,9 +62,11 @@ class ImageProcessorCore:
         if algorithm == "Linear":
             new_image = alpha * image_array + beta
         elif algorithm == "Exponential":
-            new_image = np.exp(alpha * image_array + beta)
+            normalized_image = image_array / 255.0
+            new_image = 255.0 * np.exp(alpha * normalized_image) - beta
         elif algorithm == "Logarithmic":
-            new_image = np.log(alpha * image_array + beta)
+            normalized_image = image_array / 255.0
+            new_image = 255.0 * np.log(alpha * normalized_image + beta)
         else:
             messagebox.showerror("Error", "Invalid brightness algorithm")
             raise ValueError("Invalid brightness algorithm")
@@ -72,7 +74,7 @@ class ImageProcessorCore:
         # Clip the values to 0-255
         new_image = np.clip(new_image, 0, 255)
 
-        return Image.fromarray(new_image)
+        return Image.fromarray(new_image.astype(np.uint8))
 
     @staticmethod
     def resize_image(image: Image.Image, scale_factor: float) -> Image.Image:
