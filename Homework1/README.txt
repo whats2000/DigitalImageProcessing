@@ -7,6 +7,8 @@
 
 Install the required packages by running the following commands:
 ```bash
+sudo apt install python3-pip
+sudo apt-get install python3-pil python3-pil.imagetk
 pip install pillow numpy matplotlib opencv-python
 sudo apt install python3-tk
 ```

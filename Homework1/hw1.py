@@ -35,6 +35,10 @@ MAIN_THEME = "#282c34"
 MAIN_FONT_COLOR = "#ffffff"
 MAIN_ACTIVE_COLOR = "#528bff"
 
+# This is for working with the PIL library older
+if not hasattr(Image, 'Resampling'):
+    Image.Resampling = Image
+
 
 class ImageProcessorCore:
     @staticmethod
