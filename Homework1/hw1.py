@@ -86,6 +86,7 @@ class ImageProcessorCore:
         Returns:
             The resized image
         """
+        # Use PIL's built-in resize function with bilinear interpolation
         return image.resize(
             (
                 math.floor(image.width * scale_factor),
@@ -104,6 +105,7 @@ class ImageProcessorCore:
         Returns:
             The rotated image
         """
+        # Use PIL's built-in rotate function with bilinear
         return image.rotate(angle, resample=Image.Resampling.BILINEAR)
 
     @staticmethod
@@ -179,8 +181,10 @@ class ImageProcessorCore:
             The smoothed image
         """
         assert smoothing_level > 0, "Smoothing level must be greater than 0"
-        if smoothing_level % 2 == 0:
-            smoothing_level += 1
+        # As kernel size must be odd, we multiply the smoothing level by 2 and add 1
+        smoothing_level = int(2 * smoothing_level + 1)
+
+        # Apply Gaussian blur to the image
         return Image.fromarray(cv2.GaussianBlur(np.array(image), (smoothing_level, smoothing_level), 0))
 
     @staticmethod
@@ -236,7 +240,7 @@ class ImageProcessorApp:
         self.bit_plane_level = tk.IntVar()
         self.bit_plane_level.set(0)
         self.smoothing_level = tk.IntVar()
-        self.smoothing_level.set(3)
+        self.smoothing_level.set(1)
         self.sharpening_level = tk.IntVar()
         self.sharpening_level.set(1)
 
