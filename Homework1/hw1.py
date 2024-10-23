@@ -62,11 +62,9 @@ class ImageProcessorCore:
         if algorithm == "Linear":
             new_image = alpha * image_array + beta
         elif algorithm == "Exponential":
-            normalized_image = image_array / 255.0
-            new_image = 255.0 * np.exp(alpha * normalized_image) - beta
+            new_image = np.exp(alpha * image_array + beta)
         elif algorithm == "Logarithmic":
-            normalized_image = image_array / 255.0
-            new_image = 255.0 * np.log(alpha * normalized_image + beta)
+            new_image = np.log(alpha * image_array + beta)
         else:
             messagebox.showerror("Error", "Invalid brightness algorithm")
             raise ValueError("Invalid brightness algorithm")
@@ -208,6 +206,7 @@ class ImageProcessorCore:
 
         return Image.fromarray(sharpened_image)
 
+
 class ImageProcessorApp:
     def __init__(self, root_window: tk.Tk):
         """
@@ -337,7 +336,7 @@ class ImageProcessorApp:
         self.open_button.pack(side=tk.LEFT, padx=10)
         self.save_button.pack(side=tk.LEFT, padx=10)
 
-    def _setup_contrast_brightness_frame(self, parent_frame: tk.Frame):
+    def _setup_contrast_brightness_frame(self, parent_frame: tk.Frame, start_row=1):
         """
         Set up the frame for adjusting alpha and beta values for brightness/contrast
         """
@@ -348,11 +347,11 @@ class ImageProcessorApp:
             bg=MAIN_THEME,
             fg=MAIN_FONT_COLOR,
         )
-        selection_text.grid(row=1, column=0)
+        selection_text.grid(row=start_row, column=0)
 
         # Menu for selecting the brightness algorithm
         menu_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
-        menu_frame.grid(row=2, column=0)
+        menu_frame.grid(row=start_row + 1, column=0)
         self.brightness_menu = tk.OptionMenu(
             menu_frame,
             self.brightness_algorithm,
@@ -369,24 +368,31 @@ class ImageProcessorApp:
         self.brightness_menu.pack(side=tk.LEFT, padx=10)
         self.brightness_apply_button.pack(side=tk.LEFT, padx=10)
 
-        # Input boxes for adjusting alpha and beta values
-        input_boxes_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
-        input_boxes_frame.grid(row=3, column=0)
+        # Alpha frame for adjusting
+        alpha_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        alpha_frame.grid(row=start_row + 2, column=0)
+        alpha_label = tk.Label(alpha_frame, text="a value", bg=MAIN_THEME, fg=MAIN_FONT_COLOR)
         self.alpha_input = tk.Entry(
-            input_boxes_frame,
+            alpha_frame,
             textvariable=self.brightness_alpha,
             width=10,
         )
+        alpha_label.pack(side=tk.LEFT, padx=10)
+        self.alpha_input.pack(side=tk.LEFT, padx=10)
+
+        # Beta frame for adjusting
+        beta_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        beta_frame.grid(row=start_row + 3, column=0)
+        beta_label = tk.Label(beta_frame, text="b value", bg=MAIN_THEME, fg=MAIN_FONT_COLOR)
         self.beta_input = tk.Entry(
-            input_boxes_frame,
+            beta_frame,
             textvariable=self.brightness_beta,
             width=10,
         )
-
-        self.alpha_input.pack(side=tk.LEFT, padx=10)
+        beta_label.pack(side=tk.LEFT, padx=10)
         self.beta_input.pack(side=tk.LEFT, padx=10)
 
-    def _setup_resize_rotate_frame(self, parent_frame: tk.Frame):
+    def _setup_resize_rotate_frame(self, parent_frame: tk.Frame, start_row=5):
         """
         Set up the frame for resizing and rotating images
         """
@@ -397,45 +403,44 @@ class ImageProcessorApp:
             bg=MAIN_THEME,
             fg=MAIN_FONT_COLOR,
         )
-        selection_text.grid(row=4, column=0)
+        selection_text.grid(row=start_row, column=0)
 
-        # Input boxes for resizing and rotating
-        input_boxes_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
-        input_boxes_frame.grid(row=5, column=0)
+        # Resize scale input box and button
+        resize_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        resize_frame.grid(row=start_row + 1, column=0)
         self.resize_input = tk.Entry(
-            input_boxes_frame,
+            resize_frame,
             textvariable=self.resize_scale,
-            width=10,
-        )
-        self.rotate_input = tk.Entry(
-            input_boxes_frame,
-            textvariable=self.rotate_angle,
             width=10,
         )
 
         self.resize_input.pack(side=tk.LEFT, padx=10)
-        self.rotate_input.pack(side=tk.LEFT, padx=10)
-
-        # Buttons for resizing and rotating
-        button_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
-        button_frame.grid(row=6, column=0)
         self.resize_button = tk.Button(
-            button_frame,
+            resize_frame,
             text="Resize",
             width=10,
             command=self._resize_image,
         )
+        self.resize_button.pack(side=tk.LEFT, padx=10)
+
+        # Rotate angle input box and button
+        rotate_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        rotate_frame.grid(row=start_row + 2, column=0)
+        self.rotate_input = tk.Entry(
+            rotate_frame,
+            textvariable=self.rotate_angle,
+            width=10,
+        )
         self.rotate_button = tk.Button(
-            button_frame,
+            rotate_frame,
             text="Rotate",
             width=10,
             command=self._rotate_image,
         )
-
-        self.resize_button.pack(side=tk.LEFT, padx=10)
+        self.rotate_input.pack(side=tk.LEFT, padx=10)
         self.rotate_button.pack(side=tk.LEFT, padx=10)
 
-    def _setup_gray_level_slicing_frame(self, parent_frame: tk.Frame):
+    def _setup_gray_level_slicing_frame(self, parent_frame: tk.Frame, start_row=8):
         """
         Set up the frame for gray level slicing
         """
@@ -446,11 +451,11 @@ class ImageProcessorApp:
             bg=MAIN_THEME,
             fg=MAIN_FONT_COLOR,
         )
-        selection_text.grid(row=7, column=0)
+        selection_text.grid(row=start_row, column=0)
 
         # Preserve original values checkbox
         preserve_original_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
-        preserve_original_frame.grid(row=8, column=0)
+        preserve_original_frame.grid(row=start_row + 1, column=0)
         self.preserve_original_checkbox = tk.Checkbutton(
             preserve_original_frame,
             text="Preserve Original",
@@ -469,24 +474,31 @@ class ImageProcessorApp:
         )
         self.slice_button.pack(side=tk.LEFT, padx=10)
 
-        # Input boxes for min and max gray level
-        input_boxes_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
-        input_boxes_frame.grid(row=9, column=0)
+        # Frame for min level label and input box
+        min_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        min_frame.grid(row=start_row + 2, column=0)
+        min_label = tk.Label(min_frame, text="Min Gray Level", bg=MAIN_THEME, fg=MAIN_FONT_COLOR)
         self.min_gray_input = tk.Entry(
-            input_boxes_frame,
+            min_frame,
             textvariable=self.min_gray,
             width=10,
         )
+        min_label.pack(side=tk.LEFT, padx=10)
+        self.min_gray_input.pack(side=tk.LEFT, padx=10)
+
+        # Frame for max level label and input box
+        max_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        max_frame.grid(row=start_row + 3, column=0)
+        max_label = tk.Label(max_frame, text="Max Gray Level", bg=MAIN_THEME, fg=MAIN_FONT_COLOR)
         self.max_gray_input = tk.Entry(
-            input_boxes_frame,
+            max_frame,
             textvariable=self.max_gray,
             width=10,
         )
-
-        self.min_gray_input.pack(side=tk.LEFT, padx=10)
+        max_label.pack(side=tk.LEFT, padx=10)
         self.max_gray_input.pack(side=tk.LEFT, padx=10)
 
-    def _setup_histogram_equalization_frame(self, parent_frame: tk.Frame):
+    def _setup_histogram_equalization_frame(self, parent_frame: tk.Frame, start_row=13):
         """
         Set up the frame for histogram equalization
         """
@@ -497,11 +509,11 @@ class ImageProcessorApp:
             bg=MAIN_THEME,
             fg=MAIN_FONT_COLOR,
         )
-        selection_text.grid(row=11, column=0)
+        selection_text.grid(row=start_row, column=0)
 
         # Button for histogram equalization
         button_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
-        button_frame.grid(row=12, column=0)
+        button_frame.grid(row=start_row + 1, column=0)
         self.equalize_button = tk.Button(
             button_frame,
             text="Equalize",
@@ -511,7 +523,7 @@ class ImageProcessorApp:
 
         self.equalize_button.pack(side=tk.LEFT, padx=10)
 
-    def _setup_bit_plane_frame(self, parent_frame: tk.Frame):
+    def _setup_bit_plane_frame(self, parent_frame: tk.Frame, start_row=15):
         """
         Set up the frame for bit-plane images
         """
@@ -522,11 +534,11 @@ class ImageProcessorApp:
             bg=MAIN_THEME,
             fg=MAIN_FONT_COLOR,
         )
-        selection_text.grid(row=13, column=0)
+        selection_text.grid(row=start_row, column=0)
 
         # Scale for selecting the bit-plane image
         scale_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
-        scale_frame.grid(row=14, column=0)
+        scale_frame.grid(row=start_row + 1, column=0)
         self.bit_plane_scale = tk.Scale(
             scale_frame,
             from_=0,
@@ -545,7 +557,7 @@ class ImageProcessorApp:
         )
         self.bit_plane_button.pack(side=tk.LEFT, padx=10)
 
-    def _setup_smoothing_sharpening_frame(self, parent_frame: tk.Frame):
+    def _setup_smoothing_sharpening_frame(self, parent_frame: tk.Frame, start_row=17):
         """
         Set up the frame for smoothing and sharpening
         """
@@ -556,43 +568,40 @@ class ImageProcessorApp:
             bg=MAIN_THEME,
             fg=MAIN_FONT_COLOR,
         )
-        selection_text.grid(row=15, column=0)
+        selection_text.grid(row=start_row, column=0)
 
-        # Input boxes for smoothing and sharpening
-        input_boxes_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
-        input_boxes_frame.grid(row=16, column=0)
+        # Smoothing label and input box
+        smoothing_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        smoothing_frame.grid(row=start_row + 1, column=0)
         self.smoothing_input = tk.Entry(
-            input_boxes_frame,
+            smoothing_frame,
             textvariable=self.smoothing_level,
             width=10,
         )
-        self.sharpening_input = tk.Entry(
-            input_boxes_frame,
-            textvariable=self.sharpening_level,
-            width=10,
-        )
-
-        self.smoothing_input.pack(side=tk.LEFT, padx=10)
-        self.sharpening_input.pack(side=tk.LEFT, padx=10)
-
-        # Buttons for smoothing and sharpening
-        button_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
-        button_frame.grid(row=17, column=0)
-
         self.smoothing_button = tk.Button(
-            button_frame,
+            smoothing_frame,
             text="Smooth",
             width=10,
             command=self._smooth_image,
         )
+        self.smoothing_input.pack(side=tk.LEFT, padx=10)
+        self.smoothing_button.pack(side=tk.LEFT, padx=10)
+
+        # Sharpening label and input box
+        sharpening_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+        sharpening_frame.grid(row=start_row + 2, column=0)
+        self.sharpening_input = tk.Entry(
+            sharpening_frame,
+            textvariable=self.sharpening_level,
+            width=10,
+        )
         self.sharpening_button = tk.Button(
-            button_frame,
+            sharpening_frame,
             text="Sharpen",
             width=10,
             command=self._sharpen_image,
         )
-
-        self.smoothing_button.pack(side=tk.LEFT, padx=10)
+        self.sharpening_input.pack(side=tk.LEFT, padx=10)
         self.sharpening_button.pack(side=tk.LEFT, padx=10)
 
     def _undo_image(self):
