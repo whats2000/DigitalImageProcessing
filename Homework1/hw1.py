@@ -62,9 +62,15 @@ class ImageProcessorCore:
         if algorithm == "Linear":
             new_image = alpha * image_array + beta
         elif algorithm == "Exponential":
+            # Apply the exponential algorithm
             new_image = np.exp(alpha * image_array + beta)
+            # Apply normalization to the logarithmic algorithm
+            new_image = (new_image - np.min(new_image)) / (np.max(new_image) - np.min(new_image)) * 255
         elif algorithm == "Logarithmic":
+            # Apply the logarithmic algorithm
             new_image = np.log(alpha * image_array + beta)
+            # Apply normalization to the logarithmic algorithm
+            new_image = (new_image - np.min(new_image)) / (np.max(new_image) - np.min(new_image)) * 255
         else:
             messagebox.showerror("Error", "Invalid brightness algorithm")
             raise ValueError("Invalid brightness algorithm")
