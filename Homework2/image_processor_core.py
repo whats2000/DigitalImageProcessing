@@ -5,6 +5,10 @@ import cv2
 import numpy as np
 from PIL import Image
 
+# This is for working with the PIL library older
+if not hasattr(Image, 'Resampling'):
+    Image.Resampling = Image
+
 
 class ImageProcessorCore:
     @staticmethod
