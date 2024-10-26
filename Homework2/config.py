@@ -1,0 +1,3 @@
+MAIN_THEME = "#282c34"
+MAIN_FONT_COLOR = "#ffffff"
+MAIN_ACTIVE_COLOR = "#528bff"
