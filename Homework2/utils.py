@@ -14,8 +14,7 @@ def open_image(app: 'ImageProcessorApp'):
     file_path = filedialog.askopenfilename()
 
     # Prevent illegal file path
-    if not file_path:
-        messagebox.showerror("Error", "Invalid file path")
+    if file_path == '':
         return
 
     # Update the image label with the new image
