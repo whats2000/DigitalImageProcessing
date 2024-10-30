@@ -6,7 +6,7 @@ from image_processor_core import ImageProcessorCore
 if TYPE_CHECKING:
     from app import ImageProcessorApp
 
-class ImageOperations:
+class ImageOperationsHW1:
     def __init__(self, app: 'ImageProcessorApp'):
         self.app = app
 

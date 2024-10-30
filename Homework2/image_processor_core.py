@@ -181,3 +181,57 @@ class ImageProcessorCore:
         sharpened_image = np.clip(sharpened_image, 0, 255).astype(np.uint8)
 
         return Image.fromarray(sharpened_image)
+
+    @staticmethod
+    def apply_average_mask(image: Image.Image, kernel_size: int) -> Image.Image:
+        """
+        Apply a 3x3 average filter to image using OpenCV
+        Args:
+            image: The input image to apply the average mask
+            kernel_size: The size of the kernel for the average
+        Returns:
+            The image with the average mask applied
+        """
+        assert kernel_size % 2 == 1, "Kernel size must be odd"
+
+        # Convert the main image to OpenCV format
+        image_array = np.array(image)
+        filtered = cv2.blur(image_array, (kernel_size, kernel_size))
+        filtered_image = Image.fromarray(filtered)
+
+        return filtered_image
+
+    @staticmethod
+    def apply_median_mask(image: Image.Image, kernel_size: int) -> Image.Image:
+        """
+        Apply a median filter to image using OpenCV
+        Args:
+            image: The input image to apply the median mask
+            kernel_size: The size of the kernel for the median
+        Returns:
+            The image with the median mask applied
+        """
+        assert kernel_size % 2 == 1, "Kernel size must be odd"
+
+        # Convert the main image to OpenCV format
+        image_array = np.array(image)
+        filtered = cv2.medianBlur(image_array, kernel_size)
+        filtered_image = Image.fromarray(filtered)
+
+        return filtered_image
+
+    @staticmethod
+    def apply_laplacian_mask(image: Image.Image) -> Image.Image:
+        """
+        Apply a Laplacian mask to the image using OpenCV
+        Args:
+            image: The input image to apply the Laplacian mask
+        Returns:
+            The image with the Laplacian mask applied
+        """
+        # Convert the main image to OpenCV format
+        image_array = np.array(image)
+        filtered = cv2.Laplacian(image_array, cv2.CV_64F)
+        filtered_image = Image.fromarray(np.clip(np.abs(filtered), 0, 255).astype('uint8'))
+
+        return filtered_image

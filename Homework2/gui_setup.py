@@ -1,9 +1,9 @@
+import tkinter as tk
 from typing import TYPE_CHECKING
 
-import tkinter as tk
-from panel_swapper import PanelSwapper
 from config import MAIN_THEME, MAIN_FONT_COLOR, SECONDARY_THEME
-from utils import open_image, save_image, remove_compare_image
+from panel_swapper import PanelSwapper
+from utils import open_image, save_image
 
 if TYPE_CHECKING:
     from app import ImageProcessorApp
@@ -32,7 +32,7 @@ def setup_gui(app):
     operation_panel_container = tk.Frame(right_operation_frame, bg=MAIN_THEME)
     operation_panel_container.grid(row=1, column=1, sticky="nsew")
     app.panel_swapper = PanelSwapper(app, operation_panel_container)
-    app.panel_swapper.show_panel("HW1")
+    app.panel_swapper.show_panel("HW2")
 
 
 def _setup_window(app: 'ImageProcessorApp'):

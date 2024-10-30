@@ -7,7 +7,8 @@ from PIL import Image, ImageTk
 from matplotlib import pyplot as plt
 
 from gui_setup import setup_gui
-from image_operations import ImageOperations
+from image_operations_hw2 import ImageOperationsHW2
+
 
 class ImageProcessorApp:
     def __init__(self, root_window: tk.Tk):
@@ -44,7 +45,7 @@ class ImageProcessorApp:
         self.sharpening_level.set(1)
 
         # Set up operations
-        self.operations = ImageOperations(self)
+        self.operations = ImageOperationsHW2(self)
 
         # GUI setup
         setup_gui(self)
