@@ -25,8 +25,12 @@ class ImageOperations:
         # Apply the brightness algorithm to the image
         new_image = ImageProcessorCore.adjust_brightness(self.app.image, alpha, beta, algorithm)
 
+        new_compare_image = None
+        if self.app.compare_image:
+            new_compare_image = ImageProcessorCore.adjust_brightness(self.app.compare_image, alpha, beta, algorithm)
+
         # Update the image
-        self.app.update_image(new_image)
+        self.app.update_image([new_image, new_compare_image])
 
     def resize_image(self):
         """
@@ -40,9 +44,12 @@ class ImageOperations:
 
         # Resize the image
         new_image = ImageProcessorCore.resize_image(self.app.image, scale_factor)
+        new_compare_image = None
+        if self.app.compare_image:
+            new_compare_image = ImageProcessorCore.resize_image(self.app.compare_image, scale_factor)
 
         # Update the image
-        self.app.update_image(new_image)
+        self.app.update_image([new_image, new_compare_image])
 
     def rotate_image(self):
         """
@@ -55,9 +62,12 @@ class ImageOperations:
 
         # Rotate the image
         new_image = ImageProcessorCore.rotate_image(self.app.image, angle)
+        new_compare_image = None
+        if self.app.compare_image:
+            new_compare_image = ImageProcessorCore.rotate_image(self.app.compare_image, angle)
 
         # Update the image
-        self.app.update_image(new_image)
+        self.app.update_image([new_image, new_compare_image])
 
     def apply_gray_level_slicing(self):
         """
@@ -77,8 +87,11 @@ class ImageOperations:
 
         # Apply gray-level slicing
         sliced_image = ImageProcessorCore.gray_level_slicing(self.app.image, min_gray, max_gray, preserve_original)
+        new_compare_image = None
+        if self.app.compare_image:
+            new_compare_image = ImageProcessorCore.gray_level_slicing(self.app.compare_image, min_gray, max_gray, preserve_original)
 
-        self.app.update_image(sliced_image)
+        self.app.update_image([sliced_image, new_compare_image])
 
     def equalize_histogram(self):
         """
@@ -90,9 +103,12 @@ class ImageOperations:
 
         # Equalize the histogram
         new_image = ImageProcessorCore.histogram_equalization(self.app.image)
+        new_compare_image = None
+        if self.app.compare_image:
+            new_compare_image = ImageProcessorCore.histogram_equalization(self.app.compare_image)
 
         # Update the image
-        self.app.update_image(new_image)
+        self.app.update_image([new_image, new_compare_image])
 
     def display_bit_plane_image(self):
         """
@@ -109,7 +125,10 @@ class ImageOperations:
             return
 
         new_image = ImageProcessorCore.bit_plane_image(self.app.image, bit_plane)
-        self.app.update_image(new_image)
+        new_compare_image = None
+        if self.app.compare_image:
+            new_compare_image = ImageProcessorCore.bit_plane_image(self.app.compare_image, bit_plane)
+        self.app.update_image([new_image, new_compare_image])
 
     def smooth_image(self):
         """
@@ -123,9 +142,12 @@ class ImageOperations:
 
         # Smooth the image
         new_image = ImageProcessorCore.smooth_image(self.app.image, smoothing_level)
+        new_compare_image = None
+        if self.app.compare_image:
+            new_compare_image = ImageProcessorCore.smooth_image(self.app.compare_image, smoothing_level)
 
         # Update the image
-        self.app.update_image(new_image)
+        self.app.update_image([new_image, new_compare_image])
 
     def sharpen_image(self):
         """
@@ -139,6 +161,9 @@ class ImageOperations:
 
         # Sharpen the image
         new_image = ImageProcessorCore.sharpen_image(self.app.image, sharpening_level)
+        new_compare_image = None
+        if self.app.compare_image:
+            new_compare_image = ImageProcessorCore.sharpen_image(self.app.compare_image, sharpening_level)
 
         # Update the image
-        self.app.update_image(new_image)
+        self.app.update_image([new_image, new_compare_image])

@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 import tkinter as tk
 from panel_swapper import PanelSwapper
 from config import MAIN_THEME, MAIN_FONT_COLOR, SECONDARY_THEME
-from utils import open_image, save_image
+from utils import open_image, save_image, remove_compare_image
 
 if TYPE_CHECKING:
     from app import ImageProcessorApp
@@ -65,7 +65,7 @@ def _setup_image_display_frame(app: 'ImageProcessorApp', parent_frame: tk.Frame)
     image_frame.grid(row=1, column=0)
 
     # Create a frame for histogram
-    title = tk.Label(parent_frame, text="Histogram", bg=MAIN_THEME, fg=MAIN_FONT_COLOR)
+    title = tk.Label(parent_frame, text="Histogram/Comparison Image", bg=MAIN_THEME, fg=MAIN_FONT_COLOR)
     title.grid(row=0, column=1)
     histogram_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
     histogram_frame.grid(row=1, column=1)
@@ -75,8 +75,8 @@ def _setup_image_display_frame(app: 'ImageProcessorApp', parent_frame: tk.Frame)
     app.image_label.pack()
 
     # Display the histogram using a label
-    app.histogram_label = tk.Label(histogram_frame, bg=MAIN_THEME)
-    app.histogram_label.pack()
+    app.histogram_compare_label = tk.Label(histogram_frame, bg=MAIN_THEME)
+    app.histogram_compare_label.pack()
 
     # Undo and redo buttons
     undo_button = tk.Button(parent_frame, text="Undo", command=app.undo_image)
@@ -108,6 +108,5 @@ def _setup_upload_download_frame(app: 'ImageProcessorApp', parent_frame: tk.Fram
         text="Save Image",
         command=lambda: save_image(app),
     )
-
     app.open_button.pack(side=tk.LEFT)
     app.save_button.pack(side=tk.LEFT, padx=10)
