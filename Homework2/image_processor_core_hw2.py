@@ -214,3 +214,52 @@ class ImageProcessorCore2:
         scaled_image = (reconstructed_image / np.max(reconstructed_image) * 255).astype(np.uint8)
 
         return Image.fromarray(scaled_image)
+
+    @staticmethod
+    def multiply_by_neg_1(image_array: np.array) -> np.array:
+        """
+        Multiply the image by (-1)^(x+y)
+        Args:
+            image_array: The input image to multiply
+        Returns:
+            The image multiplied by (-1)^(x+y)
+        """
+        x, y = np.indices(image_array.shape)
+        result_array = image_array * ((-1) ** (x + y))
+        return result_array
+
+    @staticmethod
+    def compute_dft(image_array: np.array) -> np.array:
+        """
+        Compute the DFT and return the magnitude spectrum.
+        Args:
+            image_array: The input image
+        Returns:
+            The magnitude spectrum of the DFT
+        """
+        fft_result = np.fft.fft2(image_array)
+        return np.fft.fftshift(fft_result)
+
+    @staticmethod
+    def take_conjugate(fft_result: np.array) -> np.array:
+        """
+        Take the complex conjugate of the FFT result.
+        Args:
+            fft_result: The FFT result to conjugate
+        Returns:
+            The complex conjugate of the FFT result
+        """
+        return np.conj(fft_result)
+
+    @staticmethod
+    def compute_inverse_dft(fft_result: np.array) -> np.array:
+        """
+        Compute the inverse DFT and return the real part.
+        Args:
+            fft_result: The FFT result to transform
+        Returns:
+            The real part of the inverse DFT
+        """
+        ifft_shifted = np.fft.ifftshift(fft_result)
+        ifft_result = np.fft.ifft2(ifft_shifted)
+        return ifft_result

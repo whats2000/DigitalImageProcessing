@@ -17,6 +17,7 @@ class ImageProcessorApp:
 
         # Attributes for the image processing
         self.image: Union[Image.Image, None] = None
+        self.temp_array: np.array = None
         self.compare_image: Union[Image.Image, None] = None
         self.image_label: Union[tk.Label, None] = None
         self.histogram_compare_label: Union[tk.Label, None] = None
