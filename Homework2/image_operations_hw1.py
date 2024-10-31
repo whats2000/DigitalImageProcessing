@@ -1,7 +1,7 @@
 from tkinter import messagebox
 from typing import TYPE_CHECKING
 
-from image_processor_core import ImageProcessorCore
+from image_processor_core_hw1 import ImageProcessorCore
 
 if TYPE_CHECKING:
     from app import ImageProcessorApp

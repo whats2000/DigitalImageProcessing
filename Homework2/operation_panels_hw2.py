@@ -158,8 +158,8 @@ def _setup_bar_test_buttons_frame(app: 'ImageProcessorApp', parent_frame: tk.Fra
 3. “Lenna” is a famous example of digital image processing. In order to have a further
 understanding of it, please do the following steps:
 (a) Obtain the 2D-FFT of the image “Lenna.tif”, and display the spectrum image of log|F(u, v)|.
-(b) Magnitude and Phase images: Do 2D-FFT to obtain the magnitude and phase of the
-image. Display its “magnitude-only image” and “phase-only image” by applying inverse 2D FFT.
+(b) Magnitude and Phase images: Do 2D-FFT to obtain the magnitude and phase of the image. 
+    Display its “magnitude-only image” and “phase-only image” by applying inverse 2D FFT.
 """
 def _setup_lenna_buttons_frame(app: 'ImageProcessorApp', parent_frame: tk.Frame):
     """
@@ -182,24 +182,18 @@ def _setup_lenna_buttons_frame(app: 'ImageProcessorApp', parent_frame: tk.Frame)
         text="2D-FFT",
         command=app.operations.apply_fft
     )
-    app.fft_magnitude_button = tk.Button(
+    app.fft_magnitude_only_button = tk.Button(
         button_frame,
-        text="Magnitude and Phase",
-        command=app.operations.apply_fft_magnitude_phase
+        text="Magnitude Only",
+        command=app.operations.apply_inverse_fft_magnitude_only
     )
     button_frame_2 = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
     button_frame_2.pack(anchor="w", pady=5)
-    app.fft_magnitude_only_button = tk.Button(
-        button_frame_2,
-        text="Magnitude Only",
-        command=app.operations.apply_fft_magnitude_only
-    )
     app.fft_phase_only_button = tk.Button(
         button_frame_2,
         text="Phase Only",
-        command=app.operations.apply_fft_phase_only
+        command=app.operations.apply_inverse_fft_phase_only
     )
     app.fft_button.pack(side=tk.LEFT)
-    app.fft_magnitude_button.pack(side=tk.LEFT, padx=10)
-    app.fft_magnitude_only_button.pack(side=tk.LEFT)
-    app.fft_phase_only_button.pack(side=tk.LEFT, padx=10)
+    app.fft_magnitude_only_button.pack(side=tk.LEFT, padx=10)
+    app.fft_phase_only_button.pack(side=tk.LEFT)
