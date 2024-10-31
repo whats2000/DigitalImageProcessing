@@ -1,6 +1,3 @@
-import math
-from tkinter import messagebox
-
 import cv2
 import numpy as np
 from PIL import Image
@@ -74,7 +71,7 @@ class ImageProcessorCore2:
             mask = np.ones((kernel_size, kernel_size)) / (kernel_size ** 2)
 
             # Call the convolution function to apply the mask
-            filtered_array = ImageProcessorCore.convolution(image_array, mask)
+            filtered_array = ImageProcessorCore2.convolution(image_array, mask)
         else:
             # Apply the average mask using OpenCV
             filtered_array = cv2.blur(image_array, (kernel_size, kernel_size))
@@ -130,7 +127,7 @@ class ImageProcessorCore2:
             ])
 
             # Call the convolution function to apply the mask
-            filtered_array = ImageProcessorCore.convolution(image_array, laplacian_mask)
+            filtered_array = ImageProcessorCore2.convolution(image_array, laplacian_mask)
         else:
             # Apply the Laplacian mask using OpenCV
             filtered_array = cv2.Laplacian(image_array, cv2.CV_64F)
