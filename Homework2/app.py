@@ -93,7 +93,7 @@ class ImageProcessorApp:
             if self.image is not None:
                 self.image_history.append([self.image, self.compare_image])
 
-            if new_images[1] is None:
+            if len(new_images) == 1 or new_images[1] is None:
                 self.compare_image = None
 
             # Clear the redo stack when a new image operation is performed

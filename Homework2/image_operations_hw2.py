@@ -1,6 +1,8 @@
 from tkinter import messagebox
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 from image_operations_hw1 import ImageOperationsHW1
 from image_processor_core import ImageProcessorCore
 
@@ -23,7 +25,7 @@ class ImageOperationsHW2(ImageOperationsHW1):
         main_filtered_image = ImageProcessorCore.apply_average_mask(self.app.image, 3)
 
         if not self.app.compare_image:
-            self.app.update_image([main_filtered_image])
+            self.app.update_image([main_filtered_image, None])
             return
 
         compare_filtered_image = ImageProcessorCore.apply_average_mask(self.app.compare_image, 3)
@@ -40,7 +42,7 @@ class ImageOperationsHW2(ImageOperationsHW1):
         main_filtered_image = ImageProcessorCore.apply_median_mask(self.app.image, 3)
 
         if not self.app.compare_image:
-            self.app.update_image([main_filtered_image])
+            self.app.update_image([main_filtered_image, None])
             return
 
         compare_filtered_image = ImageProcessorCore.apply_median_mask(self.app.compare_image, 3)
@@ -57,8 +59,9 @@ class ImageOperationsHW2(ImageOperationsHW1):
         main_filtered_image = ImageProcessorCore.apply_laplacian_mask(self.app.image)
 
         if not self.app.compare_image:
-            self.app.update_image([main_filtered_image])
+            self.app.update_image([main_filtered_image, None])
             return
 
         compare_filtered_image = ImageProcessorCore.apply_laplacian_mask(self.app.compare_image)
         self.app.update_image([main_filtered_image, compare_filtered_image])
+
