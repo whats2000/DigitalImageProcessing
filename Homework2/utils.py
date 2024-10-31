@@ -1,6 +1,7 @@
 from tkinter import filedialog, messagebox, simpledialog
 from typing import TYPE_CHECKING
 
+import numpy as np
 from PIL import Image
 
 if TYPE_CHECKING:
@@ -51,6 +52,8 @@ def open_image(app: 'ImageProcessorApp', is_compare_image=False):
             app.compare_image = image
         else:
             app.image = image
+            app.temp_array = np.array(image)
+
         app.update_image([app.image, app.compare_image])
     except Exception as e:
         messagebox.showinfo("Error", f"Error opening image: {e}")

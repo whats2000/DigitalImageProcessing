@@ -152,6 +152,9 @@ class ImageOperationsHW2(ImageOperationsHW1):
             messagebox.showinfo("Info", "Please open an image first")
             return
 
+        if self.app.temp_array is None:
+            self.app.temp_array = np.array(self.app.image)
+
         main_fft_array = ImageProcessorCore2.compute_dft(self.app.temp_array)
         main_filtered_image = Image.fromarray(main_fft_array.real.astype(np.uint8))
         self.app.temp_array = main_fft_array
@@ -164,6 +167,9 @@ class ImageOperationsHW2(ImageOperationsHW1):
         if not self.app.image:
             messagebox.showinfo("Info", "Please open an image first")
             return
+
+        if self.app.temp_array is None:
+            self.app.temp_array = np.array(self.app.image)
 
         main_conjugate_array = ImageProcessorCore2.take_conjugate(self.app.temp_array)
         main_filtered_image = Image.fromarray(
@@ -180,8 +186,11 @@ class ImageOperationsHW2(ImageOperationsHW1):
             messagebox.showinfo("Info", "Please open an image first")
             return
 
+        if self.app.temp_array is None:
+            self.app.temp_array = np.array(self.app.image)
+
         main_inverse_dft = ImageProcessorCore2.compute_inverse_dft(self.app.temp_array)
-        main_filtered_image = Image.fromarray(main_inverse_dft.astype(np.uint8))
+        main_filtered_image = Image.fromarray(main_inverse_dft.real.astype(np.uint8))
         self.app.temp_array = main_inverse_dft
         self.app.update_image([main_filtered_image, None])
 
@@ -192,6 +201,9 @@ class ImageOperationsHW2(ImageOperationsHW1):
         if not self.app.image:
             messagebox.showinfo("Info", "Please open an image first")
             return
+
+        if self.app.temp_array is None:
+            self.app.temp_array = np.array(self.app.image)
 
         main_filtered_array = ImageProcessorCore2.multiply_by_neg_1(self.app.temp_array)
         main_filtered_image = Image.fromarray(main_filtered_array.astype(np.uint8))

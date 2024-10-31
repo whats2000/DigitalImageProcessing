@@ -64,6 +64,7 @@ class ImageProcessorApp:
 
         # Pop the last image from history and update
         previous_image = self.image_history.pop()
+        self.temp_array = np.array(previous_image[0])
         self.update_image(previous_image, append_history=False)
 
     def redo_image(self):
@@ -79,6 +80,7 @@ class ImageProcessorApp:
 
         # Pop the last image from the redo stack and update
         next_image = self.redo_stack.pop()
+        self.temp_array = np.array(next_image[0])
         self.update_image(next_image, append_history=False)
 
 
@@ -99,10 +101,6 @@ class ImageProcessorApp:
 
             # Clear the redo stack when a new image operation is performed
             self.redo_stack.clear()
-
-            # Keep history size reasonable
-            if len(self.image_history) > 10:
-                self.image_history.pop(0)
 
         self.image = new_images[0]
         photo_image: Any = ImageTk.PhotoImage(new_images[0])
