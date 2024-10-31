@@ -206,6 +206,6 @@ class ImageOperationsHW2(ImageOperationsHW1):
             self.app.temp_array = np.array(self.app.image)
 
         main_filtered_array = ImageProcessorCore2.multiply_by_neg_1(self.app.temp_array)
-        main_filtered_image = Image.fromarray(main_filtered_array.astype(np.uint8))
+        main_filtered_image = Image.fromarray(main_filtered_array.real.astype(np.uint8))
         self.app.temp_array = main_filtered_array
         self.app.update_image([main_filtered_image, None])

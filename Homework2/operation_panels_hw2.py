@@ -89,19 +89,17 @@ def _setup_mask_buttons_frame(app: 'ImageProcessorApp', parent_frame: tk.Frame):
     button_frame.pack(anchor="w", pady=5)
     app.averaging_mask_button = tk.Button(
         button_frame,
-        text="Averaging Mask",
+        text="Averaging",
         command=app.operations.apply_averaging_mask
     )
     app.median_mask_button = tk.Button(
         button_frame,
-        text="Median Mask",
+        text="Median",
         command=app.operations.apply_median_mask
     )
-    button_frame_2 = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
-    button_frame_2.pack(anchor="w", pady=5)
     app.laplacian_mask_button = tk.Button(
-        button_frame_2,
-        text="Apply Laplacian",
+        button_frame,
+        text="Laplacian",
         command=app.operations.apply_laplacian_mask
     )
     app.averaging_mask_button.pack(side=tk.LEFT)
