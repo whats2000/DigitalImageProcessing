@@ -237,8 +237,7 @@ class ImageProcessorCore2:
         Returns:
             The magnitude spectrum of the DFT
         """
-        fft_result = np.fft.fft2(image_array)
-        return np.fft.fftshift(fft_result)
+        return np.fft.fft2(image_array)
 
     @staticmethod
     def take_conjugate(fft_result: np.array) -> np.array:
@@ -260,6 +259,4 @@ class ImageProcessorCore2:
         Returns:
             The real part of the inverse DFT
         """
-        ifft_shifted = np.fft.ifftshift(fft_result)
-        ifft_result = np.fft.ifft2(ifft_shifted)
-        return ifft_result
+        return np.fft.ifft2(fft_result)
