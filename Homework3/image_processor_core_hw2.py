@@ -52,33 +52,6 @@ class ImageProcessorCore2:
         return result_image.clip(0, 255).astype(np.uint8)
 
     @staticmethod
-    def apply_average_mask(image: Image.Image, kernel_size: int) -> Image.Image:
-        """
-        Apply a 3x3 average filter to image using OpenCV
-        Args:
-            image: The input image to apply the average mask
-            kernel_size: The size of the kernel for the average
-        Returns:
-            The image with the average mask applied
-        """
-        assert kernel_size % 2 == 1, "Kernel size must be odd"
-
-        # Convert the main image to OpenCV format
-        image_array = np.array(image)
-
-        if USE_MANUALLY_FUNCTION:
-            # The average mask is a kernel of ones divided by the kernel size squared
-            mask = np.ones((kernel_size, kernel_size)) / (kernel_size ** 2)
-
-            # Call the convolution function to apply the mask
-            filtered_array = ImageProcessorCore2.convolution(image_array, mask)
-        else:
-            # Apply the average mask using OpenCV
-            filtered_array = cv2.blur(image_array, (kernel_size, kernel_size))
-
-        return Image.fromarray(filtered_array)
-
-    @staticmethod
     def apply_median_mask(image: Image.Image, kernel_size: int) -> Image.Image:
         """
         Apply a median filter to image using OpenCV

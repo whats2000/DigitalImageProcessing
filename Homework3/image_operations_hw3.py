@@ -86,3 +86,42 @@ class ImageOperationsHW3(ImageOperationsHW2):
 
         compare_filtered_image = ImageProcessorCore3.histogram_equalization(self.app.compare_image)
         self.app.update_image([main_filtered_image, compare_filtered_image])
+
+    def apply_averaging_mask(self, mask_size: int = 3):
+        """
+        Apply an averaging mask to both the main and comparison images using OpenCV.
+
+        Args:
+            mask_size (int): The size of the averaging mask
+        """
+        if not self.app.image:
+            messagebox.showinfo("Info", "Please open an image first")
+            return
+
+        main_filtered_image = ImageProcessorCore3.apply_average_mask(self.app.image, mask_size)
+
+        if not self.app.compare_image:
+            self.app.update_image([main_filtered_image, None])
+            return
+
+        compare_filtered_image = ImageProcessorCore3.apply_average_mask(self.app.compare_image, mask_size)
+        self.app.update_image([main_filtered_image, compare_filtered_image])
+
+    def apply_sharpening_mask(self, model: str):
+        """
+        Apply a sharpening mask to both the main and comparison images using OpenCV.
+        """
+        assert model in ['rgb', 'hsi'], f"Invalid model: {model}"
+
+        if not self.app.image:
+            messagebox.showinfo("Info", "Please open an image first")
+            return
+
+        main_filtered_image = ImageProcessorCore3.apply_sharpening_mask(self.app.image, model)
+
+        if not self.app.compare_image:
+            self.app.update_image([main_filtered_image, None])
+            return
+
+        compare_filtered_image = ImageProcessorCore3.apply_sharpening_mask(self.app.compare_image, model)
+        self.app.update_image([main_filtered_image, compare_filtered_image])

@@ -166,7 +166,6 @@ class ImageProcessorApp:
             plt.title('Intensity Histogram')
 
             plt.tight_layout()
-
             plt.savefig('histogram.png')
 
         histogram_image = Image.open("histogram.png").resize(

@@ -6,6 +6,7 @@ from PIL import Image
 
 from image_operations_hw1 import ImageOperationsHW1
 from image_processor_core_hw2 import ImageProcessorCore2
+from image_processor_core_hw3 import ImageProcessorCore3
 
 if TYPE_CHECKING:
     from app import ImageProcessorApp
@@ -15,26 +16,6 @@ class ImageOperationsHW2(ImageOperationsHW1):
     def __init__(self, app: 'ImageProcessorApp'):
         super().__init__(app)
         self.app = app
-
-    def apply_averaging_mask(self, mask_size: int = 3):
-        """
-        Apply an averaging mask to both the main and comparison images using OpenCV.
-
-        Args:
-            mask_size (int): The size of the averaging mask
-        """
-        if not self.app.image:
-            messagebox.showinfo("Info", "Please open an image first")
-            return
-
-        main_filtered_image = ImageProcessorCore2.apply_average_mask(self.app.image, mask_size)
-
-        if not self.app.compare_image:
-            self.app.update_image([main_filtered_image, None])
-            return
-
-        compare_filtered_image = ImageProcessorCore2.apply_average_mask(self.app.compare_image, mask_size)
-        self.app.update_image([main_filtered_image, compare_filtered_image])
 
     def apply_median_mask(self, mask_size: int = 3):
         """
