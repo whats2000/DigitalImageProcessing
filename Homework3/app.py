@@ -7,7 +7,7 @@ from PIL import Image, ImageTk
 from matplotlib import pyplot as plt
 
 from gui_setup import setup_gui
-from image_operations_hw2 import ImageOperationsHW2
+from image_operations_hw3 import ImageOperationsHW3
 
 
 class ImageProcessorApp:
@@ -46,7 +46,7 @@ class ImageProcessorApp:
         self.sharpening_level.set(1)
 
         # Set up operations
-        self.operations = ImageOperationsHW2(self)
+        self.operations = ImageOperationsHW3(self)
 
         # GUI setup
         setup_gui(self)
