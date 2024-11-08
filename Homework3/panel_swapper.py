@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from config import MAIN_THEME
 from operation_panels_hw1 import create_hw1_panel
 from operation_panels_hw2 import create_hw2_panel
+from operation_panels_hw3 import create_hw3_panel
 
 if TYPE_CHECKING:
     from app import ImageProcessorApp
@@ -19,10 +20,12 @@ class PanelSwapper:
         button_frame.pack(side=tk.TOP, fill=tk.X)
         tk.Button(button_frame, text="HW1", command=lambda: self.show_panel("HW1")).pack(side=tk.LEFT)
         tk.Button(button_frame, text="HW2", command=lambda: self.show_panel("HW2")).pack(side=tk.LEFT)
+        tk.Button(button_frame, text="HW3", command=lambda: self.show_panel("HW3")).pack(side=tk.LEFT)
 
         # Initialize panels, using only `pack` for each panel in the container
         self.panels["HW1"] = create_hw1_panel(app, container)
         self.panels["HW2"] = create_hw2_panel(app, container)
+        self.panels["HW3"] = create_hw3_panel(app, container)
 
     def show_panel(self, panel_name):
         """

@@ -32,7 +32,7 @@ def setup_gui(app):
     operation_panel_container = tk.Frame(right_operation_frame, bg=MAIN_THEME)
     operation_panel_container.grid(row=1, column=1, sticky="nsew")
     app.panel_swapper = PanelSwapper(app, operation_panel_container)
-    app.panel_swapper.show_panel("HW2")
+    app.panel_swapper.show_panel("HW3")
 
 
 def _setup_window(app: 'ImageProcessorApp'):
