@@ -116,23 +116,6 @@ class ImageProcessorCore:
         return Image.fromarray(new_image)
 
     @staticmethod
-    def histogram_equalization(image: Image.Image) -> Image.Image:
-        """
-        Perform histogram equalization on a grayscale image
-        Args:
-            image: The input image to apply histogram equalization
-        Returns:
-            The equalized image
-        """
-        if image.mode == "L":
-            return Image.fromarray(cv2.equalizeHist(np.array(image)))
-
-        image_array = np.array(image)
-        image_array_yuv = cv2.cvtColor(image_array, cv2.COLOR_RGB2YUV)
-        image_array_yuv[:, :, 0] = cv2.equalizeHist(image_array_yuv[:, :, 0])
-        return Image.fromarray(cv2.cvtColor(image_array_yuv, cv2.COLOR_YUV2RGB))
-
-    @staticmethod
     def bit_plane_image(image: Image.Image, bit_plane: int) -> Image.Image:
         """
         Display the bit-plane images for the input image

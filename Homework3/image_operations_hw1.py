@@ -2,6 +2,7 @@ from tkinter import messagebox
 from typing import TYPE_CHECKING
 
 from image_processor_core_hw1 import ImageProcessorCore
+from image_processor_core_hw3 import ImageProcessorCore3
 
 if TYPE_CHECKING:
     from app import ImageProcessorApp
@@ -102,10 +103,10 @@ class ImageOperationsHW1:
             return
 
         # Equalize the histogram
-        new_image = ImageProcessorCore.histogram_equalization(self.app.image)
+        new_image = ImageProcessorCore3.histogram_equalization(self.app.image)
         new_compare_image = None
         if self.app.compare_image:
-            new_compare_image = ImageProcessorCore.histogram_equalization(self.app.compare_image)
+            new_compare_image = ImageProcessorCore3.histogram_equalization(self.app.compare_image)
 
         # Update the image
         self.app.update_image([new_image, new_compare_image])

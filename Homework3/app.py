@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from typing import Union, List, Any
 
+import cv2
 import numpy as np
 from PIL import Image, ImageTk
 from matplotlib import pyplot as plt
@@ -120,16 +121,56 @@ class ImageProcessorApp:
         """
         # Update the histogram
         image_array = np.array(self.image)
-        plt.figure("Histogram")
-        plt.clf()
-        plt.hist(image_array.flatten(), bins=256, range=(0, 255), color='gray', alpha=0.7)
-        plt.title("Image Histogram")
-        plt.xlabel("Pixel Value")
-        plt.ylabel("Frequency")
-        plt.grid()
-        plt.savefig("histogram.png", dpi=100)
+
+        # Check image channels
+        if image_array.ndim == 2:
+
+            plt.figure("Histogram")
+            plt.clf()
+            plt.hist(image_array.flatten(), bins=256, range=(0, 255), color='gray', alpha=0.7)
+            plt.title("Image Histogram")
+            plt.xlabel("Pixel Value")
+            plt.ylabel("Frequency")
+            plt.grid()
+            plt.savefig("histogram.png", dpi=100)
+
+        else:
+            # Create the histograms (2x3)
+            plt.figure(figsize=(15, 10))
+
+            # RGB histograms
+            plt.subplot(2, 3, 1)
+            plt.hist(image_array[:, :, 0].ravel(), bins=256, color='red')
+            plt.title('Red Histogram')
+
+            plt.subplot(2, 3, 2)
+            plt.hist(image_array[:, :, 1].ravel(), bins=256, color='green')
+            plt.title('Green Histogram')
+
+            plt.subplot(2, 3, 3)
+            plt.hist(image_array[:, :, 2].ravel(), bins=256, color='blue')
+            plt.title('Blue Histogram')
+
+            # HSI histograms
+            hsi_image = cv2.cvtColor(image_array, cv2.COLOR_RGB2HSV)
+            plt.subplot(2, 3, 4)
+            plt.hist(hsi_image[:, :, 0].ravel(), bins=256, color='darkgray')
+            plt.title('Hue Histogram')
+
+            plt.subplot(2, 3, 5)
+            plt.hist(hsi_image[:, :, 1].ravel(), bins=256, color='gray')
+            plt.title('Saturation Histogram')
+
+            plt.subplot(2, 3, 6)
+            plt.hist(hsi_image[:, :, 2].ravel(), bins=256, color='lightgray')
+            plt.title('Intensity Histogram')
+
+            plt.tight_layout()
+
+            plt.savefig('histogram.png')
+
         histogram_image = Image.open("histogram.png").resize(
-            (min(400, self.image.width), min(400, self.image.height))
+            (min(512, self.image.width), min(512, self.image.height))
         )
         histogram_photo_image: Any = ImageTk.PhotoImage(histogram_image)
         self.histogram_compare_label.config(image=histogram_photo_image)

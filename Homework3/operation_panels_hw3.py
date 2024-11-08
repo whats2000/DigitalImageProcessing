@@ -14,6 +14,8 @@ def create_hw3_panel(app: 'ImageProcessorApp', container: tk.Frame):
     panel = tk.Frame(container, bg=MAIN_THEME)
     _setup_rgb_buttons_frame(app, panel)
     _setup_hsi_buttons_frame(app, panel)
+    _setup_complement_buttons_frame(app, panel)
+    _setup_histogram_equalization_frame(app, panel)
     return panel
 
 
@@ -69,6 +71,7 @@ Saturation, and Intensity components as gray-level images
 respectively.
 """
 
+
 def _setup_hsi_buttons_frame(app: 'ImageProcessorApp', parent_frame: tk.Frame):
     """
     Set up the frame for HSI operations
@@ -105,3 +108,66 @@ def _setup_hsi_buttons_frame(app: 'ImageProcessorApp', parent_frame: tk.Frame):
     app.hue_button.pack(side=tk.LEFT)
     app.saturation_button.pack(side=tk.LEFT, padx=10)
     app.intensity_button.pack(side=tk.LEFT)
+
+
+"""
+Do color complements to enhance the detail in the image by
+using RGB model.
+"""
+
+
+def _setup_complement_buttons_frame(app: 'ImageProcessorApp', parent_frame: tk.Frame):
+    """
+    Set up the frame for complement operations
+    """
+    # Create labels for the complement operations
+    complement_operation_text = tk.Label(
+        parent_frame,
+        text="Complement Operations",
+        bg=MAIN_THEME,
+        fg=MAIN_FONT_COLOR,
+    )
+    complement_operation_text.pack(anchor="w", pady=5)
+
+    # Create a frame to hold the buttons
+    button_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+    button_frame.pack(anchor="w", pady=5)
+
+    # Buttons for complement operations
+    app.complement_button = tk.Button(
+        button_frame,
+        text="Complement",
+        command=lambda: app.operations.complement_image()
+    )
+    app.complement_button.pack(side=tk.LEFT)
+
+
+"""
+Do histogram equalization for all RGB components and
+display the original and processed images for comparison
+"""
+
+def _setup_histogram_equalization_frame(app: 'ImageProcessorApp', parent_frame: tk.Frame):
+    """
+    Set up the frame for histogram equalization operations
+    """
+    # Create labels for the histogram operations
+    histogram_operation_text = tk.Label(
+        parent_frame,
+        text="Histogram Equalization",
+        bg=MAIN_THEME,
+        fg=MAIN_FONT_COLOR,
+    )
+    histogram_operation_text.pack(anchor="w", pady=5)
+
+    # Create a frame to hold the buttons
+    button_frame = tk.Frame(parent_frame, bg=MAIN_THEME, pady=10)
+    button_frame.pack(anchor="w", pady=5)
+
+    # Buttons for histogram operations
+    app.histogram_button = tk.Button(
+        button_frame,
+        text="Histogram Equalization",
+        command=lambda: app.operations.rgb_histogram_equalization()
+    )
+    app.histogram_button.pack(side=tk.LEFT)
