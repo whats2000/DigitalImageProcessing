@@ -115,7 +115,7 @@ class ImageProcessorCore3:
     @staticmethod
     def apply_average_mask(image: Image.Image, kernel_size: int) -> Image.Image:
         """
-        Apply a average filter to image using OpenCV
+        Apply an average filter to image using OpenCV
         Args:
             image: The input image to apply the average mask
             kernel_size: The size of the kernel for the average
@@ -131,8 +131,14 @@ class ImageProcessorCore3:
             # The average mask is a kernel of ones divided by the kernel size squared
             mask = np.ones((kernel_size, kernel_size)) / (kernel_size ** 2)
 
-            # Call the convolution function to apply the mask
-            filtered_array = ImageProcessorCore2.convolution(image_array, mask)
+            if image_array.ndim == 2:
+                # Call the convolution function to apply the mask
+                filtered_array = ImageProcessorCore2.convolution(image_array, mask)
+            else:
+                # Apply the average mask to each channel
+                filtered_array = np.zeros_like(image_array)
+                for i in range(3):
+                    filtered_array[:, :, i] = ImageProcessorCore2.convolution(image_array[:, :, i], mask)
         else:
             # Apply the average mask using OpenCV
             filtered_array = cv2.blur(image_array, (kernel_size, kernel_size))
@@ -177,3 +183,57 @@ class ImageProcessorCore3:
             raise ValueError("Invalid sharpening model")
 
         return Image.fromarray(sharpened_image)
+
+    @staticmethod
+    def hue_mask(image: Image.Image, lower_hue: int, upper_hue: int) -> Image.Image:
+        """
+        Apply a hue mask to the image
+        Args:
+            image: The input image to apply the hue mask
+            lower_hue: The lower hue value
+            upper_hue: The upper hue value
+        Returns:
+            The image with the hue mask applied
+        """
+        image_array = np.array(image)
+
+        # Convert the image to HSI
+        hsi_image = cv2.cvtColor(image_array, cv2.COLOR_RGB2HSV)
+
+        # Split H, S, and V channels
+        h, s, v = cv2.split(hsi_image)
+
+        # Create a mask for the hue channel
+        hue_mask = cv2.inRange(h, lower_hue, upper_hue)
+
+        # Apply the mask to the original image to show only the selected hue range
+        result = cv2.bitwise_and(image_array, image_array, mask=hue_mask)
+
+        return Image.fromarray(result)
+
+    @staticmethod
+    def saturation_mask(image: Image.Image, lower_saturation: int, upper_saturation: int) -> Image.Image:
+        """
+        Apply a saturation mask to the image
+        Args:
+            image: The input image to apply the saturation mask
+            lower_saturation: The lower saturation value
+            upper_saturation: The upper saturation value
+        Returns:
+            The image with the saturation mask applied
+        """
+        image_array = np.array(image)
+
+        # Convert the image to HSI
+        hsi_image = cv2.cvtColor(image_array, cv2.COLOR_RGB2HSV)
+
+        # Split H, S, and V channels
+        h, s, v = cv2.split(hsi_image)
+
+        # Create a mask for the saturation channel
+        saturation_mask = cv2.inRange(s, lower_saturation, upper_saturation)
+
+        # Apply the mask to the original image to show only the selected saturation range
+        result = cv2.bitwise_and(image_array, image_array, mask=saturation_mask)
+
+        return Image.fromarray(result)

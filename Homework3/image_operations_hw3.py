@@ -32,7 +32,6 @@ class ImageOperationsHW3(ImageOperationsHW2):
         compare_filtered_image = ImageProcessorCore3.rgb_image(self.app.compare_image, color)
         self.app.update_image([main_filtered_image, compare_filtered_image])
 
-
     def hsi_image(self, channel: str):
         """
         Get its “Hue component image”, “Saturation component image”, and “Intensity component image” and
@@ -68,7 +67,6 @@ class ImageOperationsHW3(ImageOperationsHW2):
 
         compare_filtered_image = ImageProcessorCore3.complement_image(self.app.compare_image)
         self.app.update_image([main_filtered_image, compare_filtered_image])
-
 
     def rgb_histogram_equalization(self):
         """
@@ -124,4 +122,39 @@ class ImageOperationsHW3(ImageOperationsHW2):
             return
 
         compare_filtered_image = ImageProcessorCore3.apply_sharpening_mask(self.app.compare_image, model)
+        self.app.update_image([main_filtered_image, compare_filtered_image])
+
+    def hue_mask(self, lower_hue: int, upper_hue: int):
+        """
+        Apply a hue mask to the image
+        """
+        if not self.app.image:
+            messagebox.showinfo("Info", "Please open an image first")
+            return
+
+        main_filtered_image = ImageProcessorCore3.hue_mask(self.app.image, lower_hue, upper_hue)
+
+        if not self.app.compare_image:
+            self.app.update_image([main_filtered_image, None])
+            return
+
+        compare_filtered_image = ImageProcessorCore3.hue_mask(self.app.compare_image, lower_hue, upper_hue)
+        self.app.update_image([main_filtered_image, compare_filtered_image])
+
+    def saturation_mask(self, lower_saturation: int, upper_saturation: int):
+        """
+        Apply a saturation mask to the image
+        """
+        if not self.app.image:
+            messagebox.showinfo("Info", "Please open an image first")
+            return
+
+        main_filtered_image = ImageProcessorCore3.saturation_mask(self.app.image, lower_saturation, upper_saturation)
+
+        if not self.app.compare_image:
+            self.app.update_image([main_filtered_image, None])
+            return
+
+        compare_filtered_image = ImageProcessorCore3.saturation_mask(self.app.compare_image, lower_saturation,
+                                                                     upper_saturation)
         self.app.update_image([main_filtered_image, compare_filtered_image])

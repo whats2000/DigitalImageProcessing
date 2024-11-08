@@ -45,6 +45,14 @@ class ImageProcessorApp:
         self.smoothing_level.set(1)
         self.sharpening_level = tk.IntVar()
         self.sharpening_level.set(1)
+        self.lower_hue = tk.IntVar()
+        self.lower_hue.set(130)
+        self.upper_hue = tk.IntVar()
+        self.upper_hue.set(160)
+        self.lower_saturation = tk.IntVar()
+        self.lower_saturation.set(50)
+        self.upper_saturation = tk.IntVar()
+        self.upper_saturation.set(150)
 
         # Set up operations
         self.operations = ImageOperationsHW3(self)

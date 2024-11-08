@@ -16,6 +16,7 @@ def create_hw3_panel(app: 'ImageProcessorApp', container: tk.Frame):
     _setup_hsi_buttons_frame(app, panel)
     _setup_complement_histogram_equalization_frame(app, panel)
     _setup_smoothing_sharpening_frame(app, panel)
+    _setup_segmentation_frame(app, panel)
     return panel
 
 
@@ -210,4 +211,66 @@ images to this “Lenna” image so that the blue feathers of
 the hat can be segmented by simple logical or arithmetic
 operations of these 2 images. Demonstration of images
 from each step as well as the final result is required.
+
+1. Convert the RGB image to HSI image.
+2. Hue mask: Find the mask for the blue color.
+3. Saturation mask: Find the mask for the saturation that satisfies the blue color.
 """
+def _setup_segmentation_frame(app: 'ImageProcessorApp', parent_frame: tk.Frame):
+    """
+    Set up the frame for segmentation operations
+    """
+    # Create labels for the segmentation operations
+    segmentation_text = tk.Label(
+        parent_frame,
+        text="Segmentation",
+        bg=MAIN_THEME,
+        fg=MAIN_FONT_COLOR,
+    )
+    segmentation_text.pack(anchor="w", pady=5)
+
+    # Create a frame to hold the input boxes and button for hue mask
+    hue_frame = tk.Frame(parent_frame, bg=MAIN_THEME)
+    hue_frame.pack(anchor="w", pady=5)
+    app.hue_mask_input_lower = tk.Entry(
+        hue_frame,
+        textvariable=app.lower_hue,
+        width=10,
+    )
+    app.hue_mask_input_upper = tk.Entry(
+        hue_frame,
+        textvariable=app.upper_hue,
+        width=10,
+    )
+    app.hue_mask_input_lower.pack(side=tk.LEFT, padx=5)
+    app.hue_mask_input_upper.pack(side=tk.LEFT, padx=5)
+    app.hue_mask_button = tk.Button(
+        hue_frame,
+        text="Hue Mask",
+        width=10,
+        command=lambda: app.operations.hue_mask(app.lower_hue.get(), app.upper_hue.get())
+    )
+    app.hue_mask_button.pack(side=tk.LEFT, padx=5)
+
+    # Create a frame to hold the input boxes and button for saturation mask
+    saturation_frame = tk.Frame(parent_frame, bg=MAIN_THEME)
+    saturation_frame.pack(anchor="w", pady=5)
+    app.saturation_mask_input_lower = tk.Entry(
+        saturation_frame,
+        textvariable=app.lower_saturation,
+        width=10,
+    )
+    app.saturation_mask_input_upper = tk.Entry(
+        saturation_frame,
+        textvariable=app.upper_saturation,
+        width=10,
+    )
+    app.saturation_mask_input_lower.pack(side=tk.LEFT, padx=5)
+    app.saturation_mask_input_upper.pack(side=tk.LEFT, padx=5)
+    app.saturation_mask_button = tk.Button(
+        saturation_frame,
+        text="Saturation Mask",
+        width=15,
+        command=lambda: app.operations.saturation_mask(app.lower_saturation.get(), app.upper_saturation.get())
+    )
+    app.saturation_mask_button.pack(side=tk.LEFT, padx=5)
